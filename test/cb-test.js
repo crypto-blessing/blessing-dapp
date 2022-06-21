@@ -143,6 +143,17 @@ describe("CryptoBlessing", function () {
         await deployBUSD();
         await deployCryptoBlessing();
 
+        let ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(BigInt(79 * 100000000 * 10 ** 9));
+
+        // transfer 7.9 billion CB token to the contract
+        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000 * 10 ** 9));
+        await transferCBTx.wait();
+        let  blessingCB = await cbToken.balanceOf(cryptoBlessing.address);
+        expect(blessingCB).to.equal(BigInt(79 * 100000000 * 10 ** 9));
+        ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(BigInt(0));
+
         const sendBUSDAmount = BigInt(200 * 10 ** 18);
         const blessingPrice = BigInt(1 * 10 ** 18);
         const claimQuantity = 10;
@@ -185,6 +196,9 @@ describe("CryptoBlessing", function () {
         let blessingClaimingStatus = await cryptoBlessing.getBlessingClaimingStatus(blessingKeypair.address)
         expect(blessingClaimingStatus.length).to.equal(1);
         console.log("blessingClaimingStatus: ", blessingClaimingStatus);
+        let senderCB = await cbToken.balanceOf(owner.address);
+        expect(senderCB).to.equal(BigInt(10 * 10 ** 9));
+
     });
 
     function toEthSignedMessageHash (messageHex) {

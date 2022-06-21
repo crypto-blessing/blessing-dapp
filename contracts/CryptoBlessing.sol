@@ -201,14 +201,13 @@ contract CryptoBlessing is Ownable {
 
         require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount / 100 * 95), "Claim the token failed!");
 
-        blessingClaimStatusMapping[blessingID].push(BlessingClaimStatus(
-            msg.sender,
-            block.timestamp,
-            distributionAmount,
-            distributionAmount / 100 * 95,
-            distributionAmount / 100 * 5,
-            10
-        ));
+        uint256 CBTokenAward = 10 * 10 ** 9;
+        // award 10 CB tokens to the sender
+        if(IERC20(CBTokenAddress).balanceOf(address(this)) >= CBTokenAward) {
+            require(IERC20(CBTokenAddress).transfer(sender, CBTokenAward), "award CB tokens failed!");
+        }
+
+        // award blessing NFT.
 
         claimerBlessingMapping[msg.sender].push(ClaimerBlessing(
             blessingID,
@@ -217,6 +216,16 @@ contract CryptoBlessing is Ownable {
             distributionAmount / 100 * 95,
             distributionAmount / 100 * 5
         ));
+
+        blessingClaimStatusMapping[blessingID].push(BlessingClaimStatus(
+            msg.sender,
+            block.timestamp,
+            distributionAmount,
+            distributionAmount / 100 * 95,
+            distributionAmount / 100 * 5,
+            CBTokenAward
+        ));
+
     }
 
     function _random(uint number) internal view returns(uint){
