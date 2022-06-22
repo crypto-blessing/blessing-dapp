@@ -4,17 +4,11 @@ const { ethers } = require("hardhat");
 
 describe("CryptoBlessing", function () {
 
-    let cbToken, BUSD, cryptoBlessing;
-
-    var deployCBToken = async function () {
-        const CBToken = await ethers.getContractFactory("CBToken");
-        cbToken = await CBToken.deploy();   
-        await cbToken.deployed();
-    }
+    let BUSD, cryptoBlessing, cbToken, cbNFT;
 
     var deployCryptoBlessing = async function () {
         const CryptoBlessing = await ethers.getContractFactory("CryptoBlessing");
-        cryptoBlessing = await CryptoBlessing.deploy(BUSD.address, cbToken.address);
+        cryptoBlessing = await CryptoBlessing.deploy(BUSD.address, cbToken.address, cbNFT.address);
         await cryptoBlessing.deployed();
     }
 
@@ -24,10 +18,23 @@ describe("CryptoBlessing", function () {
         await BUSD.deployed();
     }
 
+    var deployCBToken = async function () {
+        const CBToken = await ethers.getContractFactory("CryptoBlessingToken");
+        cbToken = await CBToken.deploy();   
+        await cbToken.deployed();
+    }
+
+    var deployCBNFT = async function () {
+        const CryptoBlessingNFT = await ethers.getContractFactory("CryptoBlessingNFT");
+        cbNFT = await CryptoBlessingNFT.deploy();   
+        await cbNFT.deployed();
+    }
+
     it("Should append or remove one blessing from the blessing pool?", async function () {
         const [owner, anotherAddress] = await ethers.getSigners();
         // deploy contracts
         await deployCBToken();
+        await deployCBNFT();
         await deployBUSD();
         await deployCryptoBlessing();
         
@@ -65,6 +72,7 @@ describe("CryptoBlessing", function () {
 
         // deploy contracts
         await deployCBToken();
+        await deployCBNFT();
         await deployBUSD();
         await deployCryptoBlessing();
 
@@ -92,6 +100,7 @@ describe("CryptoBlessing", function () {
         const blessingKeypair = ethers.Wallet.createRandom();
         // deploy contracts
         await deployCBToken();
+        await deployCBNFT();
         await deployBUSD();
         await deployCryptoBlessing();
 
@@ -140,19 +149,23 @@ describe("CryptoBlessing", function () {
         // const blessingKeypair = web3.eth.accounts.create();
         // deploy contracts
         await deployCBToken();
+        await deployCBNFT();
         await deployBUSD();
         await deployCryptoBlessing();
 
         let ownerCB = await cbToken.balanceOf(owner.address);
-        expect(ownerCB).to.equal(BigInt(79 * 100000000 * 10 ** 9));
+        expect(ownerCB).to.equal(BigInt(79 * 100000000));
 
         // transfer 7.9 billion CB token to the contract
-        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000 * 10 ** 9));
+        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
         await transferCBTx.wait();
         let  blessingCB = await cbToken.balanceOf(cryptoBlessing.address);
-        expect(blessingCB).to.equal(BigInt(79 * 100000000 * 10 ** 9));
+        expect(blessingCB).to.equal(BigInt(79 * 100000000));
         ownerCB = await cbToken.balanceOf(owner.address);
         expect(ownerCB).to.equal(BigInt(0));
+
+        // transfer the owner of CBNFT to the owner of CryptoBlessing.
+        await cbNFT.transferOwnership(cryptoBlessing.address);
 
         const sendBUSDAmount = BigInt(200 * 10 ** 18);
         const blessingPrice = BigInt(1 * 10 ** 18);
@@ -180,6 +193,10 @@ describe("CryptoBlessing", function () {
         // const signature = await blessingKeypair.signMessage(MESSAGE)
         const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair.privateKey);
         // const signature = await web3.eth.sign(MESSAGE, blessingKeypair.address);
+
+        let cbNFTCount = await cbNFT.balanceOf(claimer.address)
+        expect(cbNFTCount).to.equal(0);
+
         // 3 claim the blessing
         const claimBlessingTx = await cryptoBlessing.connect(claimer).claimBlessing(
             owner.address,
@@ -197,7 +214,11 @@ describe("CryptoBlessing", function () {
         expect(blessingClaimingStatus.length).to.equal(1);
         console.log("blessingClaimingStatus: ", blessingClaimingStatus);
         let senderCB = await cbToken.balanceOf(owner.address);
-        expect(senderCB).to.equal(BigInt(10 * 10 ** 9));
+        expect(senderCB).to.equal(BigInt(2));
+
+        // check the nft
+        cbNFTCount = await cbNFT.balanceOf(claimer.address)
+        expect(cbNFTCount).to.equal(1);
 
     });
 
@@ -206,5 +227,53 @@ describe("CryptoBlessing", function () {
         const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${messageBuffer.length}`);
         return web3.utils.sha3(Buffer.concat([prefix, messageBuffer]));
     }
+
+
+    it("Should revoke a blessing?", async function () {
+
+        const [owner, blessingOwner] = await ethers.getSigners();
+        const blessingKeypair = ethers.Wallet.createRandom();
+        // deploy contracts
+        await deployCBToken();
+        await deployCBNFT();
+        await deployBUSD();
+        await deployCryptoBlessing();
+
+        const sendBUSDAmount = BigInt(200 * 10 ** 18);
+        const blessingPrice = BigInt(1 * 10 ** 18);
+        const claimQuantity = 10;
+
+        // 0 allowance
+        const approveBUSDTx = await BUSD.approve(cryptoBlessing.address, BigInt(210 * 10 ** 18));
+        await approveBUSDTx.wait();
+
+        // 1 add blessing to the pool
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1);
+        await addBlessingTx.wait();
+
+        // 2 check the balance of the sender BUSD = 400
+        let senderBUSD = await BUSD.balanceOf(owner.address);
+        console.log("senderBUSD: ", senderBUSD);
+        // 2 send blessing
+        const sendBlessingTx = await cryptoBlessing.sendBlessing(
+            "blessing image", blessingKeypair.address, 
+            sendBUSDAmount, 
+            claimQuantity,
+            0 
+        );
+        await sendBlessingTx.wait();
+
+        let mySendedBlessings = await cryptoBlessing.getMySendedBlessings()
+        expect(mySendedBlessings.length).to.equal(1);
+        expect(mySendedBlessings[0].blessingID).to.equal(blessingKeypair.address);
+        expect(mySendedBlessings[0].claimType).to.equal(0);
+        expect(mySendedBlessings[0].revoked).to.equal(false);
+
+        const revokeBlessingTx = await cryptoBlessing.revokeBlessing(blessingKeypair.address);
+        await revokeBlessingTx.wait()
+        mySendedBlessings = await cryptoBlessing.getMySendedBlessings()
+        expect(mySendedBlessings.length).to.equal(1);
+        expect(mySendedBlessings[0].revoked).to.equal(true);
+    });
 
 });
