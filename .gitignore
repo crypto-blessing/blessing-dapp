@@ -18,6 +18,9 @@
 .env.test.local
 .env.production.local
 
+.env.bsc_testnet.local
+.env.bsc_mainnet.local
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

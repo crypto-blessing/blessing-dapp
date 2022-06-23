@@ -10,6 +10,7 @@
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "chai": "^4.3.6",
+    "env-cmd": "^10.1.0",
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.8",
     "hardhat": "^2.9.9",
@@ -21,6 +22,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:local": "env-cmd -f .env.local react-scripts build",
+    "build:bsc_testnet": "env-cmd -f .env.bsc_testnet.local react-scripts build",
+    "build:bsc_mainnet": "env-cmd -f .env.bsc_mainnet.local react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
