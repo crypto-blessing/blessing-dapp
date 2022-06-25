@@ -14,12 +14,12 @@ async function main() {
     console.log("Fake BUSD deployed to:", BUSD.address);
 
     const CBToken = await hre.ethers.getContractFactory("CryptoBlessingToken");
-    let cbToken = await CBToken.deploy();   
+    let cbToken = await CBToken.deploy();
     await cbToken.deployed();
     console.log("CryptoBlessing token deployed to:", cbToken.address);
 
     const CryptoBlessingNFT = await hre.ethers.getContractFactory("CryptoBlessingNFT");
-    let cbNFT = await CryptoBlessingNFT.deploy();   
+    let cbNFT = await CryptoBlessingNFT.deploy();
     await cbNFT.deployed();
     console.log("CryptoBlessing NFT deployed to:", cbNFT.address);
 
@@ -31,13 +31,13 @@ async function main() {
     const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
     await transferCBTx.wait();
 
-    let addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png", "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097", "gong xi fa cai", BigInt(1 * 10 ** 18), 1);
+    let addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png", "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097", "gong xi fa cai#In every Chinese New Year, the greetings among Chinese", BigInt(1 * 10 ** 18), 1);
     await addBlessingTx.wait();
 
-    addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/tuo.png", "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", "脱，脱，脱!", BigInt(1 * 10 ** 18), 3);
+    addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/tuo.png", "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", "脱，脱，脱!#The ultimate home for engineers", BigInt(1 * 10 ** 18), 3);
     await addBlessingTx.wait();
 
-    addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/notwar.png", "0x2546BcD3c84621e976D8185a91A922aE77ECEc30", "make love, not war!", BigInt(9.9 * 10 ** 18), 2);
+    addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/notwar.png", "0x2546BcD3c84621e976D8185a91A922aE77ECEc30", "make love, not war!#We need to fill the world with love", BigInt(9.9 * 10 ** 18), 2);
     await addBlessingTx.wait();
 
 }

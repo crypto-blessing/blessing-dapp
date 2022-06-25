@@ -69,6 +69,8 @@ contract CryptoBlessing is Ownable {
     // 接收者的祝福列表
     mapping (address => ClaimerBlessing[]) claimerBlessingMapping;
 
+    
+
     function getMyClaimedBlessings() public view returns (ClaimerBlessing[] memory) {
         return claimerBlessingMapping[msg.sender];
     }
@@ -96,6 +98,7 @@ contract CryptoBlessing is Ownable {
         address owner;
         uint8 blessingType;
         uint256 timestamp;
+        uint8 deleted;
     }
     Blessing[] public blessingList;
 
@@ -112,23 +115,28 @@ contract CryptoBlessing is Ownable {
     ) public onlyOwner {
         console.log("start to add blessing to the pool!");
         blessingList.push(Blessing(
-            image, description, price, blessingOwner, blessingType, block.timestamp
+            image, description, price, blessingOwner, blessingType, block.timestamp, 0
         ));
     }
 
     function removeBlessing(string memory image) public onlyOwner {
         console.log("start to remove one blessing from the pool! image:%s", image);
-        uint256 index = 0;
         for (uint256 i = 0; i < blessingList.length; i ++) {
             if (compareStrings(blessingList[i].image, image)) {
-                index = i;
+                blessingList[i].deleted = 1;
                 break;
             }
         }
-        for (uint256 i = index; i < blessingList.length - 1; i ++){
-            blessingList[i] = blessingList[i+1];
+    }
+
+    function recoverBlessing(string memory image) public onlyOwner {
+        console.log("start to recover one blessing from the pool! image:%s", image);
+        for (uint256 i = 0; i < blessingList.length; i ++) {
+            if (compareStrings(blessingList[i].image, image)) {
+                blessingList[i].deleted = 0;
+                break;
+            }
         }
-        blessingList.pop();
     }
 
     function compareStrings(string memory a, string memory b) internal pure returns (bool) {
@@ -247,11 +255,8 @@ contract CryptoBlessing is Ownable {
         }
 
         // award blessing NFT.
-        // (bool success, bytes memory data) = cryptoBlessingNFTAddress.call(
-        //     abi.encodeWithSignature("awardBlessingNFT(address, string)", msg.sender, choosedSenderBlessing.blessingImage)
-        // );
-
         ICryptoBlessingNFT(cryptoBlessingNFTAddress).awardBlessingNFT(msg.sender, choosedSenderBlessing.blessingImage);
+
 
 
         claimerBlessingMapping[msg.sender].push(ClaimerBlessing(

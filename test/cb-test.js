@@ -32,6 +32,7 @@ describe("CryptoBlessing", function () {
 
     it("Should append or remove one blessing from the blessing pool?", async function () {
         const [owner, anotherAddress] = await ethers.getSigners();
+
         // deploy contracts
         await deployCBToken();
         await deployCBNFT();
@@ -54,14 +55,20 @@ describe("CryptoBlessing", function () {
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(2);
         expect(allBlessings[1].price).to.equal(BigInt(9.9 * 10 ** 18));
+        expect(allBlessings[1].deleted).to.equal(0);
 
         // remove blessing from the pool
         const removeBlessingTx = await cryptoBlessing.removeBlessing(allBlessings[0].image);
         await removeBlessingTx.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings.length).to.equal(1);
-        expect(allBlessings[0].image).to.equal("make love, not war");
+        expect(allBlessings.length).to.equal(2);
+        expect(allBlessings[0].deleted).to.equal(1);
 
+        // recover blessing from the pool
+        const recoverBlessingTx = await cryptoBlessing.recoverBlessing(allBlessings[0].image);
+        await recoverBlessingTx.wait();
+        allBlessings = await cryptoBlessing.getAllBlessings()
+        expect(allBlessings[0].deleted).to.equal(0);
     });
 
 
@@ -85,6 +92,7 @@ describe("CryptoBlessing", function () {
         }
         console.log(err)
         expect(err).to.equal("VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner'");
+
         // remove blessing from the pool
         try {
             await cryptoBlessing.connect(anotherAddress).removeBlessing("test image");
@@ -98,6 +106,7 @@ describe("CryptoBlessing", function () {
 
         const [owner, blessingOwner] = await ethers.getSigners();
         const blessingKeypair = ethers.Wallet.createRandom();
+
         // deploy contracts
         await deployCBToken();
         await deployCBNFT();
@@ -119,6 +128,7 @@ describe("CryptoBlessing", function () {
         // 2 check the balance of the sender BUSD = 400
         let senderBUSD = await BUSD.balanceOf(owner.address);
         console.log("senderBUSD: ", senderBUSD);
+
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.sendBlessing(
             "blessing image", blessingKeypair.address, 
@@ -146,6 +156,7 @@ describe("CryptoBlessing", function () {
 
         const [owner, blessingOwner, claimer] = await ethers.getSigners();
         const blessingKeypair = ethers.Wallet.createRandom();
+
         // const blessingKeypair = web3.eth.accounts.create();
         // deploy contracts
         await deployCBToken();
@@ -190,8 +201,10 @@ describe("CryptoBlessing", function () {
         console.log("start to sign the blessing, the private key is: ", blessingKeypair.privateKey);
         console.log("public key:", blessingKeypair.address);
         const MESSAGE = web3.utils.sha3('CryptoBlessing');
+        
         // const signature = await blessingKeypair.signMessage(MESSAGE)
         const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair.privateKey);
+
         // const signature = await web3.eth.sign(MESSAGE, blessingKeypair.address);
 
         let cbNFTCount = await cbNFT.balanceOf(claimer.address)
@@ -225,6 +238,7 @@ describe("CryptoBlessing", function () {
     function toEthSignedMessageHash (messageHex) {
         const messageBuffer = Buffer.from(messageHex.substring(2), 'hex');
         const prefix = Buffer.from(`\u0019Ethereum Signed Message:\n${messageBuffer.length}`);
+
         return web3.utils.sha3(Buffer.concat([prefix, messageBuffer]));
     }
 
@@ -233,6 +247,7 @@ describe("CryptoBlessing", function () {
 
         const [owner, blessingOwner] = await ethers.getSigners();
         const blessingKeypair = ethers.Wallet.createRandom();
+
         // deploy contracts
         await deployCBToken();
         await deployCBNFT();
@@ -254,6 +269,7 @@ describe("CryptoBlessing", function () {
         // 2 check the balance of the sender BUSD = 400
         let senderBUSD = await BUSD.balanceOf(owner.address);
         console.log("senderBUSD: ", senderBUSD);
+
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.sendBlessing(
             "blessing image", blessingKeypair.address, 
