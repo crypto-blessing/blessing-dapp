@@ -1,12 +1,11 @@
 // ** MUI Imports
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import InputAdornment from '@mui/material/InputAdornment'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 
 
 import {injected} from 'src/@core/components/wallet/connector'
@@ -24,7 +23,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 // ** Components
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 
-import Alert from '@mui/material/Alert';
+
 
 const AppBarContent = props => {
 
@@ -103,7 +102,7 @@ const AppBarContent = props => {
             <Menu />
           </IconButton>
         ) : null}
-        <TextField
+        {/* <TextField
           size='small'
           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4 } }}
           InputProps={{
@@ -113,7 +112,7 @@ const AppBarContent = props => {
               </InputAdornment>
             )
           }}
-        />
+        /> */}
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
 
@@ -138,7 +137,7 @@ const AppBarContent = props => {
         open={open} 
         onClose={handleClose}
         autoHideDuration={4000}>
-        <Alert severity="error" sx={{ width: '100%' }}>
+        <Alert onClose={handleClose} severity="error" sx={{ width: '100%', bgcolor: 'white' }}>
           Only support BSC network!
         </Alert>
       </Snackbar>

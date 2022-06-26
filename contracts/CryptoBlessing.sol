@@ -155,7 +155,7 @@ contract CryptoBlessing is Ownable {
         console.log("claimQuantity: %s", claimQuantity);
         console.log("claimType: %s", uint(claimType));
         require(0 < tokenAmount, "tokenAmount must be greater than 0");
-        require(0 < claimQuantity && claimQuantity <= 10, "claimQuantity must be greater than 0 and less or equal than 10");
+        require(0 < claimQuantity && claimQuantity <= 1000, "claimQuantity must be greater than 0 and less or equal than 1000");
         Blessing memory choosedBlessing;
         for (uint256 i = 0; i < blessingList.length; i ++) {
             if (compareStrings(blessingList[i].image, image)) {
@@ -163,7 +163,7 @@ contract CryptoBlessing is Ownable {
                 break;
             }
         }
-        require(choosedBlessing.price > 0, "Invalid blessing!");
+        require(choosedBlessing.price > 0 && choosedBlessing.deleted == 0, "Invalid blessing status!");
         require(IERC20(sendTokenAddress).balanceOf(msg.sender) >= tokenAmount + (claimQuantity * choosedBlessing.price), "Your token amount must be greater than you are trying to send!");
         // require(IERC20(sendTokenAddress).approve(address(this), tokenAmount), "Approve failed!");
         require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), tokenAmount), "Transfer to contract failed!");

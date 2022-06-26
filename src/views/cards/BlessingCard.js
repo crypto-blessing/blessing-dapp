@@ -9,15 +9,165 @@ import CardMedia from '@mui/material/CardMedia'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import Modal from '@mui/material/Modal';
+import Grid from '@mui/material/Grid'
+import TextField from '@mui/material/TextField'
+import CardHeader from '@mui/material/CardHeader'
+import InputAdornment from '@mui/material/InputAdornment'
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import CardActions from '@mui/material/CardActions'
+import Divider from '@mui/material/Divider'
+import FormLabel from '@mui/material/FormLabel';
+import FormControl from '@mui/material/FormControl';
+import { styled } from '@mui/material/styles'
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+
+// ** Icons Imports
+import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 import { getBlessingTitle, getBlessingDesc } from 'src/@core/utils/blessing'
 
-import {simpleShow} from 'src/@core/components/wallet/address'
+import {simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
 
 import { ethers } from 'ethers';
+import { useWeb3React } from "@web3-react/core"
+import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
+import BUSDContract from 'src/artifacts/contracts/TestBUSD.sol/BUSD.json'
 
-const CardWithCollapse = (props) => {
 
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 600,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+};
+
+// Styled Grid component
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  [theme.breakpoints.down('md')]: {
+    borderBottom: `1px solid ${theme.palette.divider}`
+  },
+  [theme.breakpoints.up('md')]: {
+    borderRight: `1px solid ${theme.palette.divider}`
+  }
+}))
+
+const BlessingCard = (props) => {
+
+  const { active, chainId } = useWeb3React()
+
+  const [open, setOpen] = useState(false);
+  const [tokenAmount, setTokenAmount] = useState(0);
+  const [claimQuantity, setClaimQuantity] = useState(0);
+  const [blessingCaption, setBlessingCaption] = useState('');
+  const [claimType, setClaimType] = useState(-1);
+  const handleOpen = () => setOpen(true);
+  const [alertMsg, setAlertMsg] = useState('');
+
+  const handleClose = () => {
+    setOpen(false)
+    setBlessingCaption('')
+  }
+
+  const handleTokenAmountChange = (event) => {
+    setTokenAmount(event.target.value);
+    handleBlessingCaption(event.target.value, claimQuantity, claimType)
+  }
+
+  const handleClaimQuantityChange = (event) => {
+    setClaimQuantity(event.target.value);
+    handleBlessingCaption(tokenAmount, event.target.value, claimType)
+  }
+
+  const handleClaimTypeChange = (event) => {
+    let localClaimType = -1
+    switch (event.target.value) {
+      case 'AVERAGE':
+        localClaimType = 0
+        break;
+      case 'RANDOM':
+        localClaimType = 1
+        break;
+    }
+    console.log("localClaimType", localClaimType)
+    setClaimType(localClaimType)
+    handleBlessingCaption(tokenAmount, claimQuantity, localClaimType)
+  }
+
+  const handleBlessingCaption = (tokenAmount, claimQuantity, claimType) => {
+    let payCaption = '', claimCaption = '';
+    console.log(tokenAmount, claimQuantity, claimType)
+    console.log('ethers.utils.formatEther(props.blessing.price', ethers.utils.formatEther(props.blessing.price))
+    if (tokenAmount > 0 && claimQuantity > 0) {
+      let totalPay = (claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount)
+      payCaption = `You will pay ${totalPay} BUSD. `
+    } else {
+      payCaption = ''
+    }
+    if (claimType > -1) {
+      if (claimType === 0) {
+        claimCaption = `You friends will claim ${(tokenAmount / claimQuantity).toFixed(2)}(tax in) BUSD and one more NFT. `
+      } else if (claimType === 1) {
+        claimCaption = `Your friend will claim a random amount and one more NFT.`
+      }
+    } else {
+      claimCaption = ''
+    }
+    setBlessingCaption(payCaption + claimCaption)
+  }
+
+  async function submitSendBlessing() {
+    if (tokenAmount <= 0 || tokenAmount > ethers.utils.formatEther(props.busdAmount)) {
+      setAlertMsg('You have insufficient BUSD balance.')
+      setAlertOpen(true);
+
+      return
+    }
+    if (claimQuantity <= 0 || claimQuantity > 1000) {
+      setAlertMsg('You only have up to 1,000 friends to collect your BUSD')
+      setAlertOpen(true);
+
+      return
+    }
+    if (claimType === -1) {
+      setAlertMsg('Pls choose the way your friend will claim your BUSD')
+      setAlertOpen(true);
+
+      return
+    }
+
+    // start to send blessing
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
+    const blessingKeypair = ethers.Wallet.createRandom();
+    const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+    await busdContract.approve(cryptoBlessingAdreess(chainId), BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18));
+    await cbContract.sendBlessing(
+      props.blessing.image, blessingKeypair.address, 
+      BigInt(tokenAmount * 10 ** 18), 
+      claimQuantity,
+      claimType
+    )
+    
+  }
+
+  const [alertOpen, setAlertOpen] = useState(false);
+
+  const handleAlertClose = () => {
+    setAlertMsg('')
+    setAlertOpen(false)
+  }
 
   return (
     <Card>
@@ -27,12 +177,20 @@ const CardWithCollapse = (props) => {
           {getBlessingTitle(props.blessing.description)}
         </Typography>
         <Typography variant='body2'>
-          {getBlessingDesc(props.blessing.description)}
+          {getBlessingDesc(props.blessing.description, true)}
         </Typography>
       </CardContent>
-      <Button variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-        Send Blessing
-      </Button>
+      {active ?
+        <Button onClick={handleOpen} variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+          Send Blessing
+        </Button>
+      :
+        <Button disabled variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+          Connect Wallet
+        </Button>
+      }
+      
+
       <CardContent>
         <Box
             sx={{
@@ -49,8 +207,141 @@ const CardWithCollapse = (props) => {
             <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='error'>{ethers.utils.formatEther(props.blessing.price).toString()} BUSD</Button>
           </Box>
       </CardContent>
+
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Card>
+            <CardHeader title='Send Blessing' titleTypographyProps={{ variant: 'h6' }} />
+            <Grid container spacing={6}>
+              <StyledGrid item md={5} xs={12}>
+                <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img width={137} height={137} alt='Apple iPhone 11 Pro' src={props.blessing.image} />
+                </CardContent>
+              </StyledGrid>
+              <Grid
+                item
+                xs={12}
+                md={7}
+                sx={{
+                  paddingTop: ['0 !important', '0 !important', '1rem !important'],
+                  paddingLeft: ['1rem !important', '1rem !important', '0 !important']
+                }}
+              >
+                <CardContent>
+                  <Typography variant='h6' sx={{ marginBottom: 2 }}>
+                  {getBlessingTitle(props.blessing.description)}
+                  </Typography>
+                  <Typography variant='body2' sx={{ marginBottom: 3.5 }}>
+                  {getBlessingDesc(props.blessing.description)}
+                  </Typography>
+                  <Typography sx={{ fontWeight: 500, marginBottom: 3 }}>
+                    Designer:{' '}
+                    <Box component='span' sx={{ fontWeight: 'bold' }}>
+                      {simpleShow(props.blessing.owner)}
+                    </Box>
+                  </Typography>
+                </CardContent>
+                <CardActions className='card-action-dense'>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                  <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='error'>{ethers.utils.formatEther(props.blessing.price).toString()} BUSD</Button>
+                  </Box>
+                </CardActions>
+              </Grid>
+            </Grid>
+          </Card>
+          <Card>
+            <CardContent>
+              <form onSubmit={e => e.preventDefault()}>
+                <Grid container spacing={5}>
+                  <Grid item xs={12}>
+                    <TextField
+                      onChange={handleTokenAmountChange}
+                      fullWidth
+                      label={'How much BUSD do you want to send?(wallet: ' + ethers.utils.formatEther(props.busdAmount) + ' BUSD)'}
+                      placeholder='10'
+                      type='number'
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <BUSD_ICON />
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      onChange={handleClaimQuantityChange}
+                      fullWidth
+                      label={'How many friends are expected to claim?'}
+                      placeholder='2'
+                      type='number'
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <AccountCircleIcon />
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FormControl>
+                      <FormLabel id="demo-row-radio-buttons-group-label">The way they claim your BUSD?</FormLabel>
+                      <RadioGroup
+                        onChange={handleClaimTypeChange}
+                        row
+                        aria-labelledby="demo-row-radio-buttons-group-label"
+                        name="row-radio-buttons-group"
+                      >
+                        <FormControlLabel value="AVERAGE" control={<Radio />} label="AVERAGE"/>
+                        <FormControlLabel value="RANDOM" control={<Radio />} label="RANDOM" />
+                      </RadioGroup>
+                    </FormControl>
+                    
+                  </Grid>
+                </Grid>
+              </form>
+              <Typography variant="caption" display="block" gutterBottom color='error'>
+                {blessingCaption}
+              </Typography>
+            </CardContent>
+            <Divider sx={{ margin: 0 }} />
+            <CardActions
+            sx={{
+              gap: 5,
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            >
+              <Button onClick={handleClose} size='large' color='secondary' variant='outlined'>
+                Cancel
+              </Button>
+              <Button onClick={submitSendBlessing} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                Send Blessing
+              </Button>
+            </CardActions>
+          </Card>
+        </Box>
+      </Modal>
+      <Snackbar 
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={alertOpen} 
+        onClose={handleAlertClose}
+        autoHideDuration={4000}>
+        <Alert onClose={handleAlertClose} severity="error" sx={{ width: '100%', bgcolor: 'white' }}>
+          {alertMsg}
+        </Alert>
+      </Snackbar>
     </Card>
   )
 }
 
-export default CardWithCollapse
+export default BlessingCard

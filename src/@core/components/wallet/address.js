@@ -8,7 +8,7 @@ export const chainName = (chainId) => {
             return 'BSC-Mainnet';
         case 97:
             return 'BSC-Testnet';
-        case 31337:
+        case 1337:
             return 'Localnet';
     }
 }
@@ -19,8 +19,21 @@ export const cryptoBlessingAdreess = (chainId) => {
             return 'BSC-Mainnet';
         case 97:
             return 'BSC-Testnet';
-        case 31337:
-            return '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e';
+        case 1337:
+            return '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9';
+        default:
+            return 'BSC-Mainnet';
+    }
+}
+
+export const BUSDContractAddress = (chainId) => {
+    switch (chainId) {
+        case 56:
+            return 'BSC-Mainnet';
+        case 97:
+            return 'BSC-Testnet';
+        case 1337:
+            return '0x5FbDB2315678afecb367f032d93F642f64180aa3';
         default:
             return 'BSC-Mainnet';
     }
