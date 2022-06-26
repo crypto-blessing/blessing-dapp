@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -24,6 +24,7 @@ import FormControl from '@mui/material/FormControl';
 import { styled } from '@mui/material/styles'
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Link from '@mui/material/Link';
 
 // ** Icons Imports
 import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
@@ -32,6 +33,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { getBlessingTitle, getBlessingDesc } from 'src/@core/utils/blessing'
 
 import {simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
+
 
 import { ethers } from 'ethers';
 import { useWeb3React } from "@web3-react/core"
@@ -74,10 +76,16 @@ const BlessingCard = (props) => {
   const [claimType, setClaimType] = useState(-1);
   const handleOpen = () => setOpen(true);
   const [alertMsg, setAlertMsg] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
+  const [blessingKeypairAddress, setBlessingKeypairAddress] = useState('');
 
   const handleClose = () => {
     setOpen(false)
     setBlessingCaption('')
+    setTokenAmount(0)
+    setClaimQuantity(0)
+    setClaimType(-1)
   }
 
   const handleTokenAmountChange = (event) => {
@@ -115,20 +123,22 @@ const BlessingCard = (props) => {
     } else {
       payCaption = ''
     }
-    if (claimType > -1) {
-      if (claimType === 0) {
-        claimCaption = `You friends will claim ${(tokenAmount / claimQuantity).toFixed(2)}(tax in) BUSD and one more NFT. `
-      } else if (claimType === 1) {
-        claimCaption = `Your friend will claim a random amount and one more NFT.`
+    if (payCaption !== '') {
+      if (claimType > -1) {
+        if (claimType === 0) {
+          claimCaption = `Your friends will claim ${(tokenAmount / claimQuantity).toFixed(2)}(tax in) BUSD and one more NFT. `
+        } else if (claimType === 1) {
+          claimCaption = `Your friends will claim a random amount and one more NFT.`
+        }
+      } else {
+        claimCaption = ''
       }
-    } else {
-      claimCaption = ''
     }
     setBlessingCaption(payCaption + claimCaption)
   }
 
   async function submitSendBlessing() {
-    if (tokenAmount <= 0 || tokenAmount > ethers.utils.formatEther(props.busdAmount)) {
+    if (tokenAmount <= 0 || tokenAmount > ethers.utils.formatEther(busdAmount)) {
       setAlertMsg('You have insufficient BUSD balance.')
       setAlertOpen(true);
 
@@ -146,20 +156,47 @@ const BlessingCard = (props) => {
 
       return
     }
+    setSending(true)
 
     // start to send blessing
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
     const blessingKeypair = ethers.Wallet.createRandom();
     const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
-    await busdContract.approve(cryptoBlessingAdreess(chainId), BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18));
-    await cbContract.sendBlessing(
-      props.blessing.image, blessingKeypair.address, 
-      BigInt(tokenAmount * 10 ** 18), 
-      claimQuantity,
-      claimType
-    )
+    try {
+      await busdContract.approve(cryptoBlessingAdreess(chainId), BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18));
+      
+      const sendBlessingTx = await cbContract.sendBlessing(
+        props.blessing.image, blessingKeypair.address, 
+        BigInt(tokenAmount * 10 ** 18), 
+        claimQuantity,
+        claimType
+      )
+      await sendBlessingTx.wait();
+      setSending(false)
+      setBlessingKeypairAddress(blessingKeypair.address)
+      localStorage.setItem('my_blessing_claim_key_' + blessingKeypair.address, blessingKeypair.privateKey)
+      setOpen(false)
+      setSendSuccessOpen(true)
+      fetchBUSDAmount()
+    } catch (e) {
+      setAlertMsg('Something went wrong. Please contact admin in telegram.')
+      setAlertOpen(true);
+      setSending(false)
+    }
     
+  }
+
+  const copyClaimLink = () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    provider.getSigner().getAddress().then(async (address) => {
+      const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
+      navigator.clipboard.writeText(`🙏CryptoBlessing🙏 Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${blessingKeypairAddress}/${privateKey} which sended by ${simpleShow(address)}. May god bless you! 🙏`)
+    })
+  }
+
+  const handleSendSuccessClose = () => {
+    setSendSuccessOpen(false)
   }
 
   const [alertOpen, setAlertOpen] = useState(false);
@@ -168,6 +205,29 @@ const BlessingCard = (props) => {
     setAlertMsg('')
     setAlertOpen(false)
   }
+
+  const [busdAmount, setBusdAmount] = useState(0)
+
+  async function fetchBUSDAmount() {
+    console.log('chainId', chainId)
+    if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+        provider.getSigner().getAddress().then(async (address) => {
+            try {
+                setBusdAmount(await busdContract.balanceOf(address))
+            } catch (err) {
+                console.log("Error: ", err)
+            }
+        })
+        
+    }    
+  }
+
+  useEffect(() => {
+    fetchBUSDAmount()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId])
 
   return (
     <Card>
@@ -262,7 +322,7 @@ const BlessingCard = (props) => {
                     <TextField
                       onChange={handleTokenAmountChange}
                       fullWidth
-                      label={'How much BUSD do you want to send?(wallet: ' + ethers.utils.formatEther(props.busdAmount) + ' BUSD)'}
+                      label={'How much BUSD do you want to send?(wallet: ' + ethers.utils.formatEther(busdAmount) + ' BUSD)'}
                       placeholder='10'
                       type='number'
                       InputProps={{
@@ -324,13 +384,54 @@ const BlessingCard = (props) => {
               <Button onClick={handleClose} size='large' color='secondary' variant='outlined'>
                 Cancel
               </Button>
-              <Button onClick={submitSendBlessing} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+              <Button onClick={submitSendBlessing} disabled={sending} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
                 Send Blessing
               </Button>
             </CardActions>
           </Card>
         </Box>
       </Modal>
+
+      <Modal
+        open={sendSuccessOpen}
+        onClose={handleSendSuccessClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Card>
+            <CardMedia sx={{ height: '14.5625rem' }} image='/images/blessings/congrats.webp' />
+            <CardContent>
+              <Typography variant='h6' sx={{ marginBottom: 2 }}>
+                Congratulations!
+              </Typography>
+              <Typography variant='body2'>
+                You have already sended this blessing successfully. Pls copy the claim link and share it with your friends.
+              </Typography>
+              <Typography variant='caption' color='error'>
+                FYI, only use this claim link can claim your blessing!
+              </Typography>
+            </CardContent>
+            <CardActions
+              sx={{
+                gap: 5,
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+              >
+                <Button onClick={handleSendSuccessClose} size='large' color='secondary' variant='outlined'>
+                  Cancel
+                </Button>
+                <Button onClick={copyClaimLink} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                  Copy Claim Link
+                </Button>
+              </CardActions>
+          </Card>
+        </Box>
+      </Modal>
+
       <Snackbar 
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         open={alertOpen} 
@@ -338,6 +439,7 @@ const BlessingCard = (props) => {
         autoHideDuration={4000}>
         <Alert onClose={handleAlertClose} severity="error" sx={{ width: '100%', bgcolor: 'white' }}>
           {alertMsg}
+          <Link target='_blank' href="https://t.me/crypto_blessing_eng" underline="always">Find admin in telegram</Link>
         </Alert>
       </Snackbar>
     </Card>

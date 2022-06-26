@@ -18,7 +18,7 @@ const navigation = () => {
     {
       title: 'Blessings',
       icon: CurrencyBitcoinIcon,
-      path: '/blessings'
+      path: '/'
     },
     {
       sectionTitle: 'Mine'
@@ -26,7 +26,7 @@ const navigation = () => {
     {
       title: 'Sended',
       icon: SendAndArchiveIcon,
-      path: '/pages/login',
+      path: '/sended',
     },
     {
       title: 'Claimed',

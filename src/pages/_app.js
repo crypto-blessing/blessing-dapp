@@ -66,7 +66,7 @@ const App = props => {
           <title>{`${themeConfig.templateName} - Blessing is the most universal human expression of emotion, and we are NFTizing it.`}</title>
           <meta
             name='description'
-            content={`${themeConfig.templateName} – Material Design React Admin Dashboard Template – is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.`}
+            content={`${themeConfig.templateName} – Blessing is the most universal human expression of emotion, and we are NFTizing it.`}
           />
           <meta name='keywords' content='crypto, blessing, coins, web3, lucky, bag, red' />
           <meta name='viewport' content='initial-scale=1, width=device-width' />

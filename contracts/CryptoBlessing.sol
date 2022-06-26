@@ -5,6 +5,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+
 import "hardhat/console.sol";
 
 interface ICryptoBlessingNFT {
@@ -12,6 +14,8 @@ interface ICryptoBlessingNFT {
 }
 
 contract CryptoBlessing is Ownable {
+
+    using SafeMath for uint256;
 
     // 发送的token地址
     address sendTokenAddress; 
@@ -46,7 +50,7 @@ contract CryptoBlessing is Ownable {
         string blessingImage;
         uint256 sendTimestamp;
         uint256 tokenAmount;
-        uint8 claimQuantity;
+        uint256 claimQuantity;
         ClaimType claimType;
         bool revoked;
     }
@@ -147,7 +151,7 @@ contract CryptoBlessing is Ownable {
         string memory image,
         address blessingID,
         uint256 tokenAmount,
-        uint8 claimQuantity,
+        uint256 claimQuantity,
         ClaimType claimType
     ) public {
         console.log("start to send blessing! image:%s, blessingID:%s", image, blessingID);
@@ -164,10 +168,10 @@ contract CryptoBlessing is Ownable {
             }
         }
         require(choosedBlessing.price > 0 && choosedBlessing.deleted == 0, "Invalid blessing status!");
-        require(IERC20(sendTokenAddress).balanceOf(msg.sender) >= tokenAmount + (claimQuantity * choosedBlessing.price), "Your token amount must be greater than you are trying to send!");
+        require(IERC20(sendTokenAddress).balanceOf(msg.sender) >= tokenAmount.add((claimQuantity.mul(choosedBlessing.price))), "Your token amount must be greater than you are trying to send!");
         // require(IERC20(sendTokenAddress).approve(address(this), tokenAmount), "Approve failed!");
         require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), tokenAmount), "Transfer to contract failed!");
-        require(IERC20(sendTokenAddress).transferFrom(msg.sender, choosedBlessing.owner, claimQuantity * choosedBlessing.price), "Transfer to the owner of blessing failed!");
+        require(IERC20(sendTokenAddress).transferFrom(msg.sender, choosedBlessing.owner, claimQuantity.mul(choosedBlessing.price)), "Transfer to the owner of blessing failed!");
 
         senderBlessingMapping[msg.sender].push(SenderBlessing(
             blessingID,
@@ -234,21 +238,21 @@ contract CryptoBlessing is Ownable {
 
         uint256 distributionAmount = 0;
         if (choosedSenderBlessing.claimType == ClaimType.AVERAGE_CLAIM) {
-            distributionAmount = choosedSenderBlessing.tokenAmount / choosedSenderBlessing.claimQuantity;
+            distributionAmount = choosedSenderBlessing.tokenAmount.div(choosedSenderBlessing.claimQuantity);
         } else if (choosedSenderBlessing.claimType == ClaimType.RANDOM_CLAIM) {
             uint randromNumber = _random(choosedSenderBlessing.claimQuantity);
-            uint256 leftQuantity = choosedSenderBlessing.claimQuantity - blessingClaimStatusList.length;
+            uint256 leftQuantity = choosedSenderBlessing.claimQuantity.sub(blessingClaimStatusList.length);
             if (leftQuantity == 1) {
-                distributionAmount = choosedSenderBlessing.tokenAmount - distributedAmount;
+                distributionAmount = choosedSenderBlessing.tokenAmount.sub(distributedAmount);
             } else {
-                distributionAmount = (choosedSenderBlessing.tokenAmount - distributedAmount) / leftQuantity * randromNumber / leftQuantity;
+                distributionAmount = choosedSenderBlessing.tokenAmount.sub(distributedAmount).div(leftQuantity).mul(randromNumber).div(leftQuantity);
             }
         }
 
-        require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount / 100 * 95), "Claim the token failed!");
-        require(IERC20(sendTokenAddress).transfer(owner(), distributionAmount / 100 * 5), "Tansfer tax failed!");
+        require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount.div(100).mul(95)), "Claim the token failed!");
+        require(IERC20(sendTokenAddress).transfer(owner(), distributionAmount.div(100).mul(5)), "Tansfer tax failed!");
 
-        uint256 CBTokenAward = distributionAmount / (10 ** 18) / CBTOKENAWARDRATIO;
+        uint256 CBTokenAward = distributionAmount.div(10 ** 18).div(CBTOKENAWARDRATIO);
         // award 10 CB tokens to the sender
         if(IERC20(cryptoBlessingTokenAddress).balanceOf(address(this)) >= CBTokenAward) {
             require(IERC20(cryptoBlessingTokenAddress).transfer(sender, CBTokenAward), "award CB tokens failed!");
@@ -263,16 +267,16 @@ contract CryptoBlessing is Ownable {
             blessingID,
             choosedSenderBlessing.blessingImage,
             block.timestamp,
-            distributionAmount / 100 * 95,
-            distributionAmount / 100 * 5
+            distributionAmount.div(100).mul(95),
+            distributionAmount.div(100).mul(5)
         ));
 
         blessingClaimStatusMapping[blessingID].push(BlessingClaimStatus(
             msg.sender,
             block.timestamp,
             distributionAmount,
-            distributionAmount / 100 * 95,
-            distributionAmount / 100 * 5,
+            distributionAmount.div(100).mul(95),
+            distributionAmount.div(100).mul(5),
             CBTokenAward
         ));
 
