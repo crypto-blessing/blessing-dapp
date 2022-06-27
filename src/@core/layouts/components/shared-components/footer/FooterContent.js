@@ -4,7 +4,8 @@ import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Twitter from 'mdi-material-ui/Twitter'
-import TelegramIcon from '@mui/icons-material/Telegram';
+import Telegram from '@mui/icons-material/Telegram';
+import IconButton from '@mui/material/IconButton'
 
 const FooterContent = () => {
   // ** Var
@@ -18,18 +19,22 @@ const FooterContent = () => {
           ❤️
         </Box> */}
         {/* {` by `} */}
-        <Link target='_blank' href='https://cryptoblessing.app/'>
+        <Link href='/'>
           CryptoBlessing
         </Link>
       </Typography>
-      <Typography sx={{ mr: 2 }}>
-        <Link target='_blank' href="https://twitter.com/cryptoblessing4">
-          <Twitter />
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Link target='_blank' href='https://twitter.com/cryptoblessing4' passHref>
+          <IconButton component='a'>
+            <Twitter sx={{ color: '#1da1f2' }} />
+          </IconButton>
         </Link>
-        <Link target='_blank' href="https://t.me/crypto_blessing_eng">
-          <TelegramIcon />
+        <Link target='_blank' href='https://t.me/crypto_blessing_eng' passHref>
+          <IconButton component='a'>
+            <Telegram sx={{ color: '#1da1f2' }} />
+          </IconButton>
         </Link>
-      </Typography>
+      </Box>
       {/* {hidden ? null : (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', '& :not(:last-child)': { mr: 4 } }}>
           <Link

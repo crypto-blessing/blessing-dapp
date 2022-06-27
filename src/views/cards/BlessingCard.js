@@ -280,7 +280,7 @@ const BlessingCard = (props) => {
             <Grid container spacing={6}>
               <StyledGrid item md={5} xs={12}>
                 <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img width={137} height={137} alt='Apple iPhone 11 Pro' src={props.blessing.image} />
+                  <img width={137} height={137} alt='CryptoBlessing' src={props.blessing.image} />
                 </CardContent>
               </StyledGrid>
               <Grid

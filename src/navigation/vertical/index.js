@@ -31,12 +31,12 @@ const navigation = () => {
     {
       title: 'Claimed',
       icon: ArrowCircleLeftIcon,
-      path: '/pages/login',
+      path: '/claimed',
     },
     {
-      title: 'Wallet',
+      title: 'Wallet',  
       icon: AccountBalanceWalletIcon,
-      path: '/pages/login',
+      path: '/wallet',
     },
 
     // {

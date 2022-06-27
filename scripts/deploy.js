@@ -28,7 +28,7 @@ async function main() {
     await cryptoBlessing.deployed();
     console.log("CryptoBlessing core contract deployed to:", cryptoBlessing.address);
 
-    const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
+    const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(9 * 100000000));
     await transferCBTx.wait();
 
     let addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png", "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097", "gong xi fa cai#In every Chinese New Year, the greetings among Chinese", BigInt(1 * 10 ** 18), 1);

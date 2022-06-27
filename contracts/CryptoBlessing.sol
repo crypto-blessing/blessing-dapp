@@ -252,7 +252,7 @@ contract CryptoBlessing is Ownable {
         require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount.div(100).mul(95)), "Claim the token failed!");
         require(IERC20(sendTokenAddress).transfer(owner(), distributionAmount.div(100).mul(5)), "Tansfer tax failed!");
 
-        uint256 CBTokenAward = distributionAmount.div(10 ** 18).div(CBTOKENAWARDRATIO);
+        uint256 CBTokenAward = distributionAmount.div(10 ** 18).mul(CBTOKENAWARDRATIO);
         // award 10 CB tokens to the sender
         if(IERC20(cryptoBlessingTokenAddress).balanceOf(address(this)) >= CBTokenAward) {
             require(IERC20(cryptoBlessingTokenAddress).transfer(sender, CBTokenAward), "award CB tokens failed!");
