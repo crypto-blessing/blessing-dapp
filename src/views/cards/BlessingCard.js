@@ -33,6 +33,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { getBlessingTitle, getBlessingDesc } from 'src/@core/utils/blessing'
 
 import {simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
+import {encode} from 'src/@core/utils/cypher'
 
 
 import { ethers } from 'ethers';
@@ -191,7 +192,7 @@ const BlessingCard = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getSigner().getAddress().then(async (address) => {
       const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
-      navigator.clipboard.writeText(`🙏CryptoBlessing🙏 Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${blessingKeypairAddress}/${privateKey} which sended by ${simpleShow(address)}. May god bless you! 🙏`)
+      navigator.clipboard.writeText(`🙏CryptoBlessing🙏 Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${encode(address)}/${encode(blessingKeypairAddress)}/${encode(privateKey)} which sended by ${simpleShow(address)}. May god bless you! 🙏`)
     })
   }
 

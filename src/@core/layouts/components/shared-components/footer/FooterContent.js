@@ -24,13 +24,13 @@ const FooterContent = () => {
         </Link>
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Link target='_blank' href='https://twitter.com/cryptoblessing4' passHref>
-          <IconButton component='a'>
+        <Link target='_blank' href='https://twitter.com/cryptoblessing4'>
+          <IconButton>
             <Twitter sx={{ color: '#1da1f2' }} />
           </IconButton>
         </Link>
-        <Link target='_blank' href='https://t.me/crypto_blessing_eng' passHref>
-          <IconButton component='a'>
+        <Link target='_blank' href='https://t.me/crypto_blessing_eng'>
+          <IconButton>
             <Telegram sx={{ color: '#1da1f2' }} />
           </IconButton>
         </Link>

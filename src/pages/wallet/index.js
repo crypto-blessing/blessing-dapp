@@ -89,7 +89,7 @@ const itemData = [
 
 const Wallet = () => {
 
-    const { active, chainId } = useWeb3React()
+    const { active, account, chainId } = useWeb3React()
 
     const [BNBAmount, setBNBAmount] = useState(0)
     const [BUSDAmount, setBUSDAmount] = useState(0)
@@ -117,7 +117,7 @@ const Wallet = () => {
       useEffect(() => {
         fetchERC20Amount()
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [chainId])
+      }, [chainId, account])
 
     return (
         <Grid container spacing={6}>

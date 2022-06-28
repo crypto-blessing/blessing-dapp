@@ -227,7 +227,7 @@ describe("CryptoBlessing", function () {
         expect(blessingClaimingStatus.length).to.equal(1);
         console.log("blessingClaimingStatus: ", blessingClaimingStatus);
         let senderCB = await cbToken.balanceOf(owner.address);
-        expect(senderCB).to.equal(BigInt(2));
+        expect(senderCB).to.equal(BigInt(200));
 
         // check the nft
         cbNFTCount = await cbNFT.balanceOf(claimer.address)

@@ -30,7 +30,6 @@ contract CryptoBlessing is Ownable {
         CBTOKENAWARDRATIO = _CBTOKENAWARDRATIO;
     }
 
-
     constructor(address _sendTokenAddress, address _cryptoBlessingTokenAddress, address _cryptoBlessingNFTAddress) payable {
         console.log("Blessing is the most universal human expression of emotion, and we are NFTizing it!");
         console.log("sendTokenAddress: %s", _sendTokenAddress);
@@ -60,6 +59,18 @@ contract CryptoBlessing is Ownable {
 
     function getMySendedBlessings() public view returns (SenderBlessing[] memory) {
         return senderBlessingMapping[msg.sender];
+    }
+
+    function getAllInfoOfBlessing(address sender, address blessingID) public view returns (SenderBlessing memory, BlessingClaimStatus[] memory) {
+        SenderBlessing[] memory senderBlessings = senderBlessingMapping[sender];
+        SenderBlessing memory choosedSenderBlessing;
+        for (uint256 i = 0; i < senderBlessings.length; i ++) {
+            if (senderBlessings[i].blessingID == blessingID) {
+                choosedSenderBlessing = senderBlessings[i];
+            }
+        }
+        BlessingClaimStatus[] memory blessingClaimStatus = blessingClaimStatusMapping[blessingID];
+        return (choosedSenderBlessing, blessingClaimStatus);
     }
 
     struct ClaimerBlessing {
@@ -203,9 +214,6 @@ contract CryptoBlessing is Ownable {
         senderBlessingMapping[msg.sender][choosedIndex].revoked = true;
     }
 
-
-
-
     function claimBlessing(
         address sender,
         address blessingID,
@@ -235,7 +243,6 @@ contract CryptoBlessing is Ownable {
             distributedAmount += blessingClaimStatusList[i].distributedAmount;
         }
 
-
         uint256 distributionAmount = 0;
         if (choosedSenderBlessing.claimType == ClaimType.AVERAGE_CLAIM) {
             distributionAmount = choosedSenderBlessing.tokenAmount.div(choosedSenderBlessing.claimQuantity);
@@ -260,8 +267,6 @@ contract CryptoBlessing is Ownable {
 
         // award blessing NFT.
         ICryptoBlessingNFT(cryptoBlessingNFTAddress).awardBlessingNFT(msg.sender, choosedSenderBlessing.blessingImage);
-
-
 
         claimerBlessingMapping[msg.sender].push(ClaimerBlessing(
             blessingID,

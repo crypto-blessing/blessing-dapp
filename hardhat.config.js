@@ -18,18 +18,29 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.4",
+  solidity: {
+    version: "0.8.4",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
   paths: {
     artifacts: './src/artifacts',
   },
   networks: {
     hardhat: {
-      chainId: 1337
+      chainId: 1337,
+      gas: 12000000,
+      blockGasLimit: 0x1fffffffffffff,
+      allowUnlimitedContractSize: true,
     },
     bsc_testnet: {
       url: "https://apis.ankr.com/4ba236862ab54a55b364dcd322cdb412/807cff1041c516e514318a326153c1f3/binance/full/test",
       chainId: 97,
       accounts: ["ac2d5115cdb6297b6182362c93fefaff3dc6188afcbe1da3dd62002f5fab01b5"]
-    }
+    },
   },
 };
