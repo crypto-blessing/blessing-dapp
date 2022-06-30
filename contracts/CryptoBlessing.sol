@@ -26,10 +26,20 @@ contract CryptoBlessing is Ownable {
 
     uint256 CBTOKENAWARDRATIO = 10;
 
+    uint256 CLAIM_TAX_RATE = 10; // 1000
+
+    event claimerClaimComplete(address sender, address blessingID);
+
+    event senderRevokeComplete(address sender, address blessingID);
+
     function setCBTOKENAWARDRATIO(uint256 _CBTOKENAWARDRATIO) public onlyOwner {
         CBTOKENAWARDRATIO = _CBTOKENAWARDRATIO;
     }
 
+
+    function setCLAIM_TAX_RATE(uint256 _CLAIM_TAX_RATE) public onlyOwner {
+        CLAIM_TAX_RATE = _CLAIM_TAX_RATE;
+    }
     constructor(address _sendTokenAddress, address _cryptoBlessingTokenAddress, address _cryptoBlessingNFTAddress) payable {
         console.log("Blessing is the most universal human expression of emotion, and we are NFTizing it!");
         console.log("sendTokenAddress: %s", _sendTokenAddress);
@@ -61,7 +71,7 @@ contract CryptoBlessing is Ownable {
         return senderBlessingMapping[msg.sender];
     }
 
-    function getAllInfoOfBlessing(address sender, address blessingID) public view returns (SenderBlessing memory, BlessingClaimStatus[] memory) {
+    function getAllInfoOfBlessing(address sender, address blessingID) public view returns (Blessing memory, SenderBlessing memory, BlessingClaimStatus[] memory) {
         SenderBlessing[] memory senderBlessings = senderBlessingMapping[sender];
         SenderBlessing memory choosedSenderBlessing;
         for (uint256 i = 0; i < senderBlessings.length; i ++) {
@@ -69,11 +79,20 @@ contract CryptoBlessing is Ownable {
                 choosedSenderBlessing = senderBlessings[i];
             }
         }
+        require(choosedSenderBlessing.tokenAmount > 0, "There is no blessing found on this sender!");
         BlessingClaimStatus[] memory blessingClaimStatus = blessingClaimStatusMapping[blessingID];
-        return (choosedSenderBlessing, blessingClaimStatus);
+        Blessing memory choosedBlessing;
+        for (uint256 i = 0; i < blessingList.length; i ++) {
+            if (compareStrings(blessingList[i].image, choosedSenderBlessing.blessingImage)) {
+                choosedBlessing = blessingList[i];
+                break;
+            }
+        }
+        return (choosedBlessing, choosedSenderBlessing, blessingClaimStatus);
     }
 
     struct ClaimerBlessing {
+        address sender;
         address blessingID;
         string blessingImage;
         uint256 claimTimestamp;
@@ -212,6 +231,8 @@ contract CryptoBlessing is Ownable {
         require(choosedSenderBlessing.tokenAmount > 0, "There is no blessing found on this sender!");
         require(IERC20(sendTokenAddress).transfer(msg.sender, choosedSenderBlessing.tokenAmount), "Transfer back to sender failed!");
         senderBlessingMapping[msg.sender][choosedIndex].revoked = true;
+
+        emit senderRevokeComplete(msg.sender, blessingID);
     }
 
     function claimBlessing(
@@ -219,7 +240,7 @@ contract CryptoBlessing is Ownable {
         address blessingID,
         bytes32 hash,
         bytes memory signature
-    ) payable public {
+    ) payable public returns (ClaimerBlessing memory){
         console.log("start to claim blessing! sender:%s, blessingID:%s", sender, blessingID);
         require(_verify(hash, signature, blessingID), "Invalid signiture!");
         console.log("signature is valid!");
@@ -231,7 +252,7 @@ contract CryptoBlessing is Ownable {
                 choosedSenderBlessing = senderBlessings[i];
             }
         }
-        
+        require(choosedSenderBlessing.revoked == false, "This blessing is revoked!");
         require(choosedSenderBlessing.tokenAmount > 0, "There is no blessing found on this sender!");
         BlessingClaimStatus[] memory blessingClaimStatusList = blessingClaimStatusMapping[blessingID];
         require(blessingClaimStatusList.length < choosedSenderBlessing.claimQuantity, "There is no more blessings!");
@@ -256,8 +277,8 @@ contract CryptoBlessing is Ownable {
             }
         }
 
-        require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount.div(100).mul(95)), "Claim the token failed!");
-        require(IERC20(sendTokenAddress).transfer(owner(), distributionAmount.div(100).mul(5)), "Tansfer tax failed!");
+        require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount.div(1000).mul(1000 - CLAIM_TAX_RATE)), "Claim the token failed!");
+        require(IERC20(sendTokenAddress).transfer(owner(), distributionAmount.div(1000).mul(CLAIM_TAX_RATE)), "Tansfer tax failed!");
 
         uint256 CBTokenAward = distributionAmount.div(10 ** 18).mul(CBTOKENAWARDRATIO);
         // award 10 CB tokens to the sender
@@ -268,23 +289,28 @@ contract CryptoBlessing is Ownable {
         // award blessing NFT.
         ICryptoBlessingNFT(cryptoBlessingNFTAddress).awardBlessingNFT(msg.sender, choosedSenderBlessing.blessingImage);
 
-        claimerBlessingMapping[msg.sender].push(ClaimerBlessing(
+        ClaimerBlessing memory claimerBlessing = ClaimerBlessing(
+            sender,
             blessingID,
             choosedSenderBlessing.blessingImage,
             block.timestamp,
-            distributionAmount.div(100).mul(95),
-            distributionAmount.div(100).mul(5)
-        ));
+            distributionAmount.div(1000).mul(1000 - CLAIM_TAX_RATE),
+            distributionAmount.div(1000).mul(CLAIM_TAX_RATE)
+        );
+
+        claimerBlessingMapping[msg.sender].push(claimerBlessing);
 
         blessingClaimStatusMapping[blessingID].push(BlessingClaimStatus(
             msg.sender,
             block.timestamp,
             distributionAmount,
-            distributionAmount.div(100).mul(95),
-            distributionAmount.div(100).mul(5),
+            distributionAmount.div(1000).mul(1000 - CLAIM_TAX_RATE),
+            distributionAmount.div(1000).mul(CLAIM_TAX_RATE),
             CBTokenAward
         ));
 
+        emit claimerClaimComplete(sender, blessingID);
+        return claimerBlessing;
     }
 
     function _random(uint number) internal view returns(uint){

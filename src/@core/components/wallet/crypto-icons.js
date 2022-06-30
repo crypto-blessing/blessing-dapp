@@ -31,7 +31,7 @@ export const CBT_ICON = () => {
     return (
 
         <Icon classes={{root: classes.iconRoot}}>
-            <img className={classes.imageIcon} src="/images/logos/logo.jpeg" alt='CBT'/>
+            <img className={classes.imageIcon} src="/images/logos/logo.png" alt='CBT'/>
         </Icon>
 
     );

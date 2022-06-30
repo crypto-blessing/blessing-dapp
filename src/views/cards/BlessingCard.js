@@ -25,6 +25,7 @@ import { styled } from '@mui/material/styles'
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import Link from '@mui/material/Link';
+import Chip from '@mui/material/Chip';
 
 // ** Icons Imports
 import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
@@ -76,7 +77,12 @@ const BlessingCard = (props) => {
   const [blessingCaption, setBlessingCaption] = useState('');
   const [claimType, setClaimType] = useState(-1);
   const handleOpen = () => setOpen(true);
+
+
   const [alertMsg, setAlertMsg] = useState('');
+  const [alertOpen, setAlertOpen] = useState(false);
+
+
   const [sending, setSending] = useState(false);
   const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
   const [blessingKeypairAddress, setBlessingKeypairAddress] = useState('');
@@ -200,7 +206,7 @@ const BlessingCard = (props) => {
     setSendSuccessOpen(false)
   }
 
-  const [alertOpen, setAlertOpen] = useState(false);
+
 
   const handleAlertClose = () => {
     setAlertMsg('')
@@ -265,7 +271,7 @@ const BlessingCard = (props) => {
               <Typography variant='h6'>{simpleShow(props.blessing.owner)}</Typography>
               <Typography variant='caption'>Designer</Typography>
             </Box>
-            <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='error'>{ethers.utils.formatEther(props.blessing.price).toString()} BUSD</Button>
+            <Chip variant="outlined" color="warning" label={ethers.utils.formatEther(props.blessing.price).toString() + 'BUSD'} icon={<BUSD_ICON />} />
           </Box>
       </CardContent>
 
@@ -422,13 +428,13 @@ const BlessingCard = (props) => {
                 justifyContent: 'space-between'
               }}
               >
-                <Button onClick={handleSendSuccessClose} size='large' color='secondary' variant='outlined'>
-                  Cancel
-                </Button>
-                <Button onClick={copyClaimLink} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
-                  Copy Claim Link
-                </Button>
-              </CardActions>
+              <Button onClick={handleSendSuccessClose} size='large' color='secondary' variant='outlined'>
+                Cancel
+              </Button>
+              <Button onClick={copyClaimLink} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                Copy Claim Link
+              </Button>
+            </CardActions>
           </Card>
         </Box>
       </Modal>

@@ -154,7 +154,7 @@ describe("CryptoBlessing", function () {
 
     it("Should claim the blessing(random)?", async function () {
 
-        const [owner, blessingOwner, claimer] = await ethers.getSigners();
+        const [owner, sender, blessingOwner, claimer] = await ethers.getSigners();
         const blessingKeypair = ethers.Wallet.createRandom();
 
         // const blessingKeypair = web3.eth.accounts.create();
@@ -182,8 +182,11 @@ describe("CryptoBlessing", function () {
         const blessingPrice = BigInt(1 * 10 ** 18);
         const claimQuantity = 10;
 
+        const transferBUSDTx = await BUSD.transfer(sender.address, BigInt(400 * 10 ** 18));
+        await transferBUSDTx.wait();
+
         // 0 allowance
-        const approveBUSDTx = await BUSD.approve(cryptoBlessing.address, BigInt(210 * 10 ** 18));
+        const approveBUSDTx = await BUSD.connect(sender).approve(cryptoBlessing.address, BigInt(210 * 10 ** 18));
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
@@ -191,7 +194,7 @@ describe("CryptoBlessing", function () {
         await addBlessingTx.wait();
 
         // 2 send blessing
-        const sendBlessingTx = await cryptoBlessing.sendBlessing(
+        const sendBlessingTx = await cryptoBlessing.connect(sender).sendBlessing(
             "blessing image", blessingKeypair.address, 
             sendBUSDAmount, 
             claimQuantity,
@@ -212,21 +215,21 @@ describe("CryptoBlessing", function () {
 
         // 3 claim the blessing
         const claimBlessingTx = await cryptoBlessing.connect(claimer).claimBlessing(
-            owner.address,
+            sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
             signature.signature,
         );
         await claimBlessingTx.wait();
         let claimerBUSD = await BUSD.balanceOf(claimer.address);
-        expect(claimerBUSD).to.equal(BigInt(200 * 10 ** 18 / 10 * 95 / 100));
+        expect(claimerBUSD).to.equal(BigInt(200 * 10 ** 18 / 10 * 99 / 100));
         let myClaimedBlessings = await cryptoBlessing.connect(claimer).getMyClaimedBlessings()
         expect(myClaimedBlessings.length).to.equal(1);
         console.log("myClaimedBlessings: ", myClaimedBlessings);
         let blessingClaimingStatus = await cryptoBlessing.getBlessingClaimingStatus(blessingKeypair.address)
         expect(blessingClaimingStatus.length).to.equal(1);
         console.log("blessingClaimingStatus: ", blessingClaimingStatus);
-        let senderCB = await cbToken.balanceOf(owner.address);
+        let senderCB = await cbToken.balanceOf(sender.address);
         expect(senderCB).to.equal(BigInt(200));
 
         // check the nft

@@ -81,7 +81,7 @@ const AppBarContent = props => {
       }
     }
     connectWalletOnPageLoad()
-  }, [activate])
+  }, [activate, account, props])
 
   const [open, setOpen] = useState(false);
 

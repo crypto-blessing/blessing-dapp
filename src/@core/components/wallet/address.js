@@ -1,5 +1,8 @@
 export const simpleShow = (address) => {
-    return address.substring(0, 6) + '...' + address.substring(address.length - 4, address.length);
+    if (address != undefined && address.length === 42) {
+        return address.substring(0, 6) + '...' + address.substring(address.length - 4, address.length);
+    }
+    
 }
 
 export const chainName = (chainId) => {
@@ -20,10 +23,11 @@ export const cryptoBlessingAdreess = (chainId) => {
         case 97:
             return 'BSC-Testnet';
         case 1337:
-            return '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9';
+            return '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
         default:
             return 'BSC-Mainnet';
     }
+
 }
 
 export const BUSDContractAddress = (chainId) => {
@@ -46,7 +50,7 @@ export const CBTContractAddress = (chainId) => {
         case 97:
             return 'BSC-Testnet';
         case 1337:
-            return '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+            return '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0';
         default:
             return 'BSC-Mainnet';
     }

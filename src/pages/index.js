@@ -14,7 +14,7 @@ import { useEffect, useState } from "react"
 
 const Blessings = () => {
 
-    const { active, chainId } = useWeb3React()
+    const { active, account, chainId } = useWeb3React()
     const [blessings, setBlessings] = useState([])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,7 +41,7 @@ const Blessings = () => {
     useEffect(() => {
         fetchBlessings()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chainId])
+    }, [chainId, account])
 
     return (
         <Grid container spacing={6}>
