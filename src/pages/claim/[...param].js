@@ -288,7 +288,7 @@ const ClaimPage = () => {
                           <StyledTableCell>Claimer</StyledTableCell>
                           <StyledTableCell>Time</StyledTableCell>
                           <StyledTableCell>Amount</StyledTableCell>
-                          <StyledTableCell>Sender CBT Award</StyledTableCell>
+                          <StyledTableCell>CBT Reward</StyledTableCell>
                       </TableRow>
                   </TableHead>
                   <TableBody>
@@ -309,7 +309,9 @@ const ClaimPage = () => {
                         </Stack>  
                       </StyledTableCell>
                       <StyledTableCell align='right'>
-                        <Chip variant="outlined" color="primary" label={row.CBTokenAwardToSenderAmount} icon={<CBT_ICON />} />
+                        <Tooltip disableFocusListener disableTouchListener title="The CBT tokens will reward to the sender of this blessing.">
+                          <Chip variant="outlined" color="primary" label={row.CBTokenAwardToSenderAmount} icon={<CBT_ICON />} />
+                        </Tooltip>
                       </StyledTableCell>
                     </StyledTableRow>
                   ))}
