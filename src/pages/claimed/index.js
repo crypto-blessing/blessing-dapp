@@ -12,6 +12,8 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import Box from '@mui/material/Box'
+import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
+import Chip from '@mui/material/Chip'
 import { ethers } from 'ethers'
 import { useWeb3React } from "@web3-react/core"
 import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
@@ -27,8 +29,8 @@ import { useEffect, useState } from "react"
 const columns = [
     { id: 'blessing', label: 'Blessing', minWidth: 100, type: 'image' },
     { id: 'time', label: 'Time', minWidth: 100 },
-    { id: 'amount', label: 'BUSD Amount', minWidth: 100 },
-    { id: 'tax', label: 'BUSD Tax', minWidth: 100 },
+    { id: 'amount', label: 'Claim Amount', minWidth: 100, type: 'amount' },
+    { id: 'tax', label: 'Claim Tax', minWidth: 100, type: 'amount' },
     { id: 'progress', label: 'Claim Progress', minWidth: 100,  type: 'progress' }
 ]
 
@@ -108,12 +110,15 @@ const BlessingClaimed = () => {
 
                                     return (
                                     <TableCell key={column.id} align={column.align}>
+                                        {column.type === undefined ? value : ''}
+                                        
                                         {column.type === 'image' ? 
                                         <img width={80} height={80} alt='CryptoBlessing' src={value} />
-                                        : 
-                                        column.format && typeof value === 'number' ? column.format(value) : ''}
+                                        : ''}
 
-                                        {column.type === undefined ? value : ''}
+                                        {column.type === 'amount' ?
+                                        <Chip variant="outlined" color="warning" label={value} icon={<BUSD_ICON />} />
+                                        : ''}
 
                                         {column.type === 'progress' ?
                                             <Link target='_blank' href={value}  underline="always">

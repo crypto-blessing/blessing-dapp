@@ -12,6 +12,9 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import Box from '@mui/material/Box'
+import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
+import Chip from '@mui/material/Chip'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { ethers } from 'ethers'
 import { useWeb3React } from "@web3-react/core"
 import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
@@ -29,8 +32,8 @@ import { Button } from '@mui/material'
 const columns = [
     { id: 'blessing', label: 'Blessing', minWidth: 100, type: 'image' },
     { id: 'time', label: 'Time', minWidth: 100 },
-    { id: 'amount', label: 'BUSD Amount', minWidth: 100 },
-    { id: 'quantity', label: 'Claime Quantity', minWidth: 100 },
+    { id: 'amount', label: 'Send Amount', minWidth: 100, type: 'amount' },
+    { id: 'quantity', label: 'Claime Quantity', minWidth: 100, type: 'quantity' },
     { id: 'type', label: 'Claim Way', minWidth: 100 },
     { id: 'progress', label: 'Claim Progress', minWidth: 100, type: 'progress' }
 ]
@@ -116,6 +119,15 @@ const BlessingSended = () => {
                                         column.format && typeof value === 'number' ? column.format(value) : ''}
 
                                         {column.type === undefined ? value : ''}
+
+                                        {column.type === 'amount' ?
+                                        <Chip variant="outlined" color="warning" label={value} icon={<BUSD_ICON />} />
+                                        : ''}
+
+                                        {column.type == 'quantity' ?
+                                         <Chip variant="outlined" color="primary" label={value} icon={<AccountCircleIcon />} />
+                                       : ''    
+                                        }
 
                                         {column.type === 'progress' ?
                                             <Link target='_blank' href={value}  underline="always">

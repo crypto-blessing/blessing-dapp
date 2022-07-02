@@ -145,7 +145,7 @@ const BlessingCard = (props) => {
   }
 
   async function submitSendBlessing() {
-    if (tokenAmount <= 0 || tokenAmount > ethers.utils.formatEther(busdAmount)) {
+    if (tokenAmount <= 0 || BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
       setAlertMsg('You have insufficient BUSD balance.')
       setAlertOpen(true);
 

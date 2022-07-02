@@ -268,12 +268,12 @@ contract CryptoBlessing is Ownable {
         if (choosedSenderBlessing.claimType == ClaimType.AVERAGE_CLAIM) {
             distributionAmount = choosedSenderBlessing.tokenAmount.div(choosedSenderBlessing.claimQuantity);
         } else if (choosedSenderBlessing.claimType == ClaimType.RANDOM_CLAIM) {
-            uint randromNumber = _random(choosedSenderBlessing.claimQuantity);
             uint256 leftQuantity = choosedSenderBlessing.claimQuantity.sub(blessingClaimStatusList.length);
+            uint randromNumber = _random(10);
             if (leftQuantity == 1) {
                 distributionAmount = choosedSenderBlessing.tokenAmount.sub(distributedAmount);
             } else {
-                distributionAmount = choosedSenderBlessing.tokenAmount.sub(distributedAmount).div(leftQuantity).mul(randromNumber).div(leftQuantity);
+                distributionAmount = choosedSenderBlessing.tokenAmount.sub(distributedAmount).div(leftQuantity).mul(randromNumber).div(10).mul(2);
             }
         }
 

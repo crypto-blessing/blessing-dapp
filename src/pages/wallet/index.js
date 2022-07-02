@@ -15,11 +15,9 @@ import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import ImageListItemBar from '@mui/material/ImageListItemBar';
-import IconButton from '@mui/material/IconButton';
-import InfoIcon from '@mui/icons-material/Info';
 import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';
+import Box from '@mui/material/Box'
 import {BUSD_ICON, CBT_ICON} from 'src/@core/components/wallet/crypto-icons'
 
 
@@ -29,7 +27,8 @@ import { ethers } from 'ethers';
 import { useWeb3React } from "@web3-react/core"
 import BUSDContract from 'src/artifacts/contracts/TestBUSD.sol/BUSD.json'
 import CBTContract from 'src/artifacts/contracts/CryptoBlessingToken.sol/CryptoBlessingToken.json'
-import {BUSDContractAddress, CBTContractAddress} from 'src/@core/components/wallet/address'
+import CBNFTContract from 'src/artifacts/contracts/CryptoBlessingNFT.sol/CryptoBlessingNFT.json'
+import {BUSDContractAddress, CBTContractAddress, CBNFTContractAddress} from 'src/@core/components/wallet/address'
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -52,32 +51,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }
 }))
 
-const createData = (name, calories, fat, carbs, protein) => {
-return { name, calories, fat, carbs, protein }
-}
-
-const itemData = [
-{
-    img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
-    title: 'Breakfast',
-    author: '@bkristastucchio',
-    rows: 2,
-    cols: 2,
-    featured: true,
-},
-{
-    img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
-    title: 'Burger',
-    author: '@rollelflex_graphy726',
-},
-{
-    img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
-    title: 'Camera',
-    author: '@helloimnik',
-},
-];
-  
-
 
 const Wallet = () => {
 
@@ -86,6 +59,7 @@ const Wallet = () => {
     const [BNBAmount, setBNBAmount] = useState(0)
     const [BUSDAmount, setBUSDAmount] = useState(0)
     const [CBTAmount, setCBAmount] = useState('')
+    const [CBNFTItems, setCBNFTItems] = useState([])
 
     async function fetchERC20Amount() {
         console.log('chainId', chainId)
@@ -93,11 +67,13 @@ const Wallet = () => {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
             const cbtContract = new ethers.Contract(CBTContractAddress(chainId), CBTContract.abi, provider.getSigner())
+            const cbNFTContract = new ethers.Contract(CBNFTContractAddress(chainId), CBNFTContract.abi, provider.getSigner())
             provider.getSigner().getAddress().then(async (address) => {
                 try {
                     setBNBAmount(ethers.utils.formatEther(await provider.getBalance(address)))
                     setBUSDAmount(ethers.utils.formatEther(await busdContract.balanceOf(address)))
                     setCBAmount(await cbtContract.balanceOf(address) + '')
+                    setCBNFTItems(await cbNFTContract.getMyBlessingsURI())
                 } catch (err) {
                     console.log("Error: ", err)
                 }
@@ -162,30 +138,27 @@ const Wallet = () => {
                 <Card>
                     <CardHeader title='ERC-721 Tokens' titleTypographyProps={{ variant: 'h6' }} />
                     <CardContent>
-                    <ImageList sx={{ width: 550, height: 500 }}>
-                    {itemData.map((item) => (
-                        <ImageListItem key={item.img}>
-                        <img
-                            src={`${item.img}?w=248&fit=crop&auto=format`}
-                            srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                            alt={item.title}
-                            loading="lazy"
-                        />
-                        <ImageListItemBar
-                            title={item.title}
-                            subtitle={item.author}
-                            actionIcon={
-                            <IconButton
-                                sx={{ color: 'rgba(255, 255, 255, 0.54)' }}
-                                aria-label={`info about ${item.title}`}
-                            >
-                                <InfoIcon />
-                            </IconButton>
-                            }
-                        />
-                        </ImageListItem>
-                    ))}
-                    </ImageList>
+                        { CBNFTItems.length > 0 ?
+                        <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
+                        {CBNFTItems.map((item) => (
+                            <ImageListItem key={item}>
+                            <img
+                                src={`${item}?w=164&h=164&fit=crop&auto=format`}
+                                srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                alt={item.title}
+                                loading="lazy"
+                            />
+                            </ImageListItem>
+                        ))}
+                        </ImageList>
+                        :
+                        <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                            <Typography  variant="overline" display="block" gutterBottom>
+                                You don't have claimed any CryptoBlessing NFT yet!
+                            </Typography>
+                        </Box>
+                        }
+
                     </CardContent>
                     
                 </Card>

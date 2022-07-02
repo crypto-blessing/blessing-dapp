@@ -152,7 +152,7 @@ describe("CryptoBlessing", function () {
         expect(mySendedBlessings[0].claimType).to.equal(0);
     });
 
-    it("Should claim the blessing(random)?", async function () {
+    it("Should claim the blessing(avarage)?", async function () {
 
         const [owner, sender, blessingOwner, claimer] = await ethers.getSigners();
         const blessingKeypair = ethers.Wallet.createRandom();
@@ -293,6 +293,117 @@ describe("CryptoBlessing", function () {
         mySendedBlessings = await cryptoBlessing.getMySendedBlessings()
         expect(mySendedBlessings.length).to.equal(1);
         expect(mySendedBlessings[0].revoked).to.equal(true);
+    });
+
+
+    it("Should claim the blessing(random)?", async function () {
+
+        const [owner, sender, blessingOwner, claimer1, claimer2, claimer3, claimer4, claimer5] = await ethers.getSigners();
+        const blessingKeypair = ethers.Wallet.createRandom();
+
+        // const blessingKeypair = web3.eth.accounts.create();
+        // deploy contracts
+        await deployCBToken();
+        await deployCBNFT();
+        await deployBUSD();
+        await deployCryptoBlessing();
+
+        let ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(BigInt(79 * 100000000));
+
+        // transfer 7.9 billion CB token to the contract
+        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
+        await transferCBTx.wait();
+        let  blessingCB = await cbToken.balanceOf(cryptoBlessing.address);
+        expect(blessingCB).to.equal(BigInt(79 * 100000000));
+        ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(BigInt(0));
+
+        // transfer the owner of CBNFT to the owner of CryptoBlessing.
+        await cbNFT.transferOwnership(cryptoBlessing.address);
+
+        const sendBUSDAmount = BigInt(200 * 10 ** 18);
+        const blessingPrice = BigInt(1 * 10 ** 18);
+        const claimQuantity = 5;
+
+        const transferBUSDTx = await BUSD.transfer(sender.address, BigInt(400 * 10 ** 18));
+        await transferBUSDTx.wait();
+
+        // 0 allowance
+        const approveBUSDTx = await BUSD.connect(sender).approve(cryptoBlessing.address, BigInt(210 * 10 ** 18));
+        await approveBUSDTx.wait();
+
+        // 1 add blessing to the pool
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1);
+        await addBlessingTx.wait();
+
+        // 2 send blessing
+        const sendBlessingTx = await cryptoBlessing.connect(sender).sendBlessing(
+            "blessing image", blessingKeypair.address, 
+            sendBUSDAmount, 
+            claimQuantity,
+            1
+        );
+        await sendBlessingTx.wait();
+        console.log("start to sign the blessing, the private key is: ", blessingKeypair.privateKey);
+        console.log("public key:", blessingKeypair.address);
+        const MESSAGE = web3.utils.sha3('CryptoBlessing');
+        
+        // const signature = await blessingKeypair.signMessage(MESSAGE)
+        const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair.privateKey);
+
+        // 3 claim the blessing
+        const claim1BlessingTx = await cryptoBlessing.connect(claimer1).claimBlessing(
+            sender.address,
+            blessingKeypair.address,
+            toEthSignedMessageHash(MESSAGE),
+            signature.signature,
+        );
+        await claim1BlessingTx.wait();
+        let claimer1BUSD = await BUSD.balanceOf(claimer1.address);
+        console.log("claimer1BUSD: ", ethers.utils.formatEther(claimer1BUSD));
+
+
+        const claim2BlessingTx = await cryptoBlessing.connect(claimer2).claimBlessing(
+            sender.address,
+            blessingKeypair.address,
+            toEthSignedMessageHash(MESSAGE),
+            signature.signature,
+        );
+        await claim2BlessingTx.wait();
+        let claimer2BUSD = await BUSD.balanceOf(claimer2.address);
+        console.log("claimer2BUSD: ", ethers.utils.formatEther(claimer2BUSD));
+
+        const claim3BlessingTx = await cryptoBlessing.connect(claimer3).claimBlessing(
+            sender.address,
+            blessingKeypair.address,
+            toEthSignedMessageHash(MESSAGE),
+            signature.signature,
+        );
+        await claim3BlessingTx.wait();
+        let claimer3BUSD = await BUSD.balanceOf(claimer3.address);
+        console.log("claimer3BUSD: ", ethers.utils.formatEther(claimer3BUSD));
+
+        const claim4BlessingTx = await cryptoBlessing.connect(claimer4).claimBlessing(
+            sender.address,
+            blessingKeypair.address,
+            toEthSignedMessageHash(MESSAGE),
+            signature.signature,
+        );
+        await claim4BlessingTx.wait();
+        let claimer4BUSD = await BUSD.balanceOf(claimer4.address);
+        console.log("claimer4BUSD: ", ethers.utils.formatEther(claimer4BUSD));
+
+        const claim5BlessingTx = await cryptoBlessing.connect(claimer5).claimBlessing(
+            sender.address,
+            blessingKeypair.address,
+            toEthSignedMessageHash(MESSAGE),
+            signature.signature,
+        );
+        await claim5BlessingTx.wait();
+        let claimer5BUSD = await BUSD.balanceOf(claimer5.address);
+        console.log("claimer5BUSD: ", ethers.utils.formatEther(claimer5BUSD));
+
     });
 
 });

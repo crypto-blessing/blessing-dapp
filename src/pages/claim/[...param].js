@@ -115,7 +115,7 @@ const ClaimPage = () => {
       if (params.param?.length === 3) {
         setClaimKey(decode(params.param[2]))
       }
-      if (localStorage.getItem('my_claimed_' + decode(params.param[1])) === '1') {
+      if (localStorage.getItem('my_claimed_' + decode(params.param[1])) === '1' || localStorage.getItem('my_blessing_claim_key_' + decode(params.param[1])) != undefined) {
         console.log('already claimed')
         setAlreadyClaimed(true)
       }
@@ -133,6 +133,8 @@ const ClaimPage = () => {
 
   const [claiming, setClaiming] = useState(false);
   const [claimSuccessOpen, setClaimSuccessOpen] = useState(false);
+
+  const [revoking, setRevoking] = useState(false)
 
   const [claimResult, setClaimResult] = useState({})
 
@@ -152,7 +154,7 @@ const ClaimPage = () => {
     setAlertOpen(false)
   }
 
-  const { active, account, chainId } = useWeb3React()
+  const { active, account, chainId, library } = useWeb3React()
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   async function featchAllInfoOfBlessing(provider) {
@@ -174,6 +176,22 @@ const ClaimPage = () => {
   }
 
   const revokeBlessing = async () => {
+    setRevoking(true)
+
+    // start to claim blessing
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
+
+    try {
+      await cbContract.revokeBlessing(
+        blessingSended.blessingID
+      )
+      setRevoking(false)
+    } catch (e) {
+      console.log(e)
+      setRevoking(false)
+    }
+
   }
 
   const copyClaimLink = () => {
@@ -184,9 +202,12 @@ const ClaimPage = () => {
   }
 
   const claimBlessing = async () => {
+    setClaiming(true)
+
     // start to claim blessing
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
+    
     try {
       // const signature = await blessingKeypair.signMessage(MESSAGE)
       const web3 = new Web3(window.ethereum);
@@ -199,13 +220,12 @@ const ClaimPage = () => {
         toEthSignedMessageHash(web3, MESSAGE),
         signature.signature
       )
-      console.log('claimResult', claimResult)
+      console.log('claimResult', claimResult.value.toString())
       setClaimResult(claimResult)
       setClaiming(false)
       localStorage.setItem('my_claimed_' + blessingSended.blessingID, 1)
       setClaimSuccessOpen(true)
       setAlreadyClaimed(true)
-      featchAllInfoOfBlessing(provider)
     } catch (e) {
       console.log(e)
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
@@ -232,20 +252,37 @@ const ClaimPage = () => {
     })
     featchAllInfoOfBlessing(provider)
 
-    let filter = {
-      address: cryptoBlessingAdreess(chainId),
-      topics: [
-          utils.id("claimerClaimComplete(address,address)"),
-          utils.id("senderRevokeComplete(address,address)")
-      ]
-    }
-
-    provider.on(filter, (resp) => {
-      console.log('claimerClaimComplete or senderRevokeComplete happned', resp)
-    })
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sender, chainId, account])
+
+  useEffect(() => {
+    if (chainId && sender && blessingID) {
+      const web3 = new Web3(window.ethereum)
+      const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
+      cbContract.events.claimerClaimComplete({
+        filter: {
+          sender: sender,
+          blessingID: blessingID,
+        }
+      }).on('data', event => {
+        console.log('event', event)
+        if (event.returnValues.sender == sender && event.returnValues.blessingID == blessingID) {
+          featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
+        }
+      })
+      cbContract.events.senderRevokeComplete({
+        filter: {
+          sender: sender,
+          blessingID: blessingID,
+        }
+      }).on('data', event => {
+        console.log('event', event)
+        if (event.returnValues.sender == sender && event.returnValues.blessingID == blessingID) {
+          featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
+        }
+      })
+    }
+  }, [chainId, blessingID, sender, featchAllInfoOfBlessing])
 
   return (
     <Grid container spacing={6}>
@@ -325,6 +362,16 @@ const ClaimPage = () => {
               </Typography>
             </Box>
             }
+
+            {
+              claimList.length > 0 && claimList.length == blessingSended.claimQuantity ?
+              <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                <Typography  variant="overline" display="block" gutterBottom>
+                  All the blessings have already been claimed!
+                </Typography>
+              </Box>
+            : ''
+            }
             
           </CardContent>
 
@@ -343,24 +390,45 @@ const ClaimPage = () => {
             :
             ''
             }
-            { active && sender === account ?
+            { active && sender === account && !blessingSended.revoked ?
               <Stack direction="row" spacing={1}>
-                <Tooltip title="You can only revoke the amount you sended and there is no one claimed it yet.">
+                <Tooltip title="You can only revoke the amount you sended and need there is no one claimed it yet.">
                   <IconButton>
                     <InfoIcon />
                   </IconButton>
                 </Tooltip>
-                <Button disabled={claimList.length > 0} onClick={revokeBlessing} size='large' color='error' variant='outlined'>
+                <Button disabled={claimList.length > 0 || revoking} onClick={revokeBlessing} size='large' color='error' variant='outlined'>
                   Revoke
                 </Button>
                 
-                <Button onClick={copyClaimLink} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                <Button disabled={claimList.length > 0 && claimList.length == blessingSended.claimQuantity} onClick={copyClaimLink} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
                   Copy Claim Link
                 </Button>
               </Stack>
             :
             ''
             }
+
+            { active && sender === account && blessingSended.revoked ?
+              <Stack direction="row" spacing={1}>
+                <Tooltip title="You can only revoke the amount you sended and need there is no one claimed it yet.">
+                  <IconButton>
+                    <InfoIcon />
+                  </IconButton>
+                </Tooltip>
+                <Button disabled size='large' color='error' variant='outlined'>
+                  Revoked
+                </Button>
+                
+                <Button disabled onClick={copyClaimLink} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                  Copy Claim Link
+                </Button>
+              </Stack>
+            :
+            ''
+            }
+
+
 
             { active && sender !== account ?
             <Stack direction="row" spacing={1}>
@@ -395,7 +463,7 @@ const ClaimPage = () => {
                 Congrats!!! You have already claimed this blessing successfully. 
               </Typography>
               <Typography variant='caption' color='error'>
-                You just claimed {0} BUSD and one more NFT, You can check out in your wallet.
+                You just claimed your BUSD and one more NFT, You can check out in your wallet.
               </Typography>
             </CardContent>
             <CardActions
