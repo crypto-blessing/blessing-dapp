@@ -14,6 +14,7 @@ import TablePagination from '@mui/material/TablePagination'
 import Box from '@mui/material/Box'
 import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
 import Chip from '@mui/material/Chip'
+import Badge from '@mui/material/Badge';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { ethers } from 'ethers'
 import { useWeb3React } from "@web3-react/core"
@@ -110,13 +111,21 @@ const BlessingSended = () => {
                                 <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
                                 {columns.map(column => {
                                     const value = row[column.id]
+                                    const revoked = row.revoked
 
                                     return (
                                     <TableCell key={column.id} align={column.align}>
-                                        {column.type === 'image' ? 
+                                        {column.type === 'image' && !revoked ? 
                                         <img width={80} height={80} alt='CryptoBlessing' src={value} />
                                         : 
-                                        column.format && typeof value === 'number' ? column.format(value) : ''}
+                                        ''}
+
+                                        {column.type === 'image' && revoked ? 
+                                        <Badge badgeContent='revoked' color="secondary">
+                                            <img width={80} height={80} alt='CryptoBlessing' src={value} />
+                                        </Badge>
+                                        : 
+                                        ''}
 
                                         {column.type === undefined ? value : ''}
 

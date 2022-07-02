@@ -31,7 +31,8 @@ export const transBlesingsFromWalletBlessings = (sender, blessings) => {
             amount: ethers.utils.formatEther(blessing.tokenAmount),
             quantity: blessing.claimQuantity.toString(),
             type: blessing.claimType === 0 ? 'AVERAGE' : 'RANDOM',
-            progress: '/claim/' + encode(sender) + '/' + encode(blessing.blessingID)
+            progress: '/claim/' + encode(sender) + '/' + encode(blessing.blessingID),
+            revoked: blessing.revoked
         })
     })
 
