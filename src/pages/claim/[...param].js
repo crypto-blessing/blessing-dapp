@@ -250,6 +250,7 @@ const ClaimPage = () => {
       claimQuantity: 0,
       sendTimestamp: BigInt(1656544299),
     })
+    setClaimList([])
     featchAllInfoOfBlessing(provider)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -312,7 +313,7 @@ const ClaimPage = () => {
             </Typography>
             <Stack direction="row" spacing={1}>
               <Chip variant="outlined" color="warning" label={(blessingSended && blessingSended.tokenAmount ? ethers.utils.formatEther(blessingSended.tokenAmount) : 0) + ' BUSD'} icon={<BUSD_ICON />} />
-              <Chip variant="outlined" color="primary" label={(blessingSended?.claimQuantity?.toString()) + ' Blessings'} icon={<AccountCircleIcon />} />
+              <Chip variant="outlined" color="primary" label={claimList.length + '/' + (blessingSended?.claimQuantity?.toString()) + ' Blessings'} icon={<AccountCircleIcon />} />
             </Stack>
           </CardContent>
           <Divider sx={{ my: 3 }}>sended at {blessingSended.sendTimestamp ? toLocaleDateFromBigInt(blessingSended.sendTimestamp) : '1970'}  by {sender ? simpleShow(sender) : 'CryptoBlessing'}</Divider>

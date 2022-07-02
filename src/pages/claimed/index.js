@@ -104,12 +104,12 @@ const BlessingClaimed = () => {
                         <TableBody>
                             {blessings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
                             return (
-                                <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
+                                <TableRow hover role='checkbox' tabIndex={-1} key={row.code + '-' + row.time}>
                                 {columns.map(column => {
                                     const value = row[column.id]
 
                                     return (
-                                    <TableCell key={column.id} align={column.align}>
+                                    <TableCell key={value} align={column.align}>
                                         {column.type === undefined ? value : ''}
                                         
                                         {column.type === 'image' ? 

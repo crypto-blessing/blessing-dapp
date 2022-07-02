@@ -20,6 +20,8 @@ import Link from '@mui/material/Link';
 import Box from '@mui/material/Box'
 import {BUSD_ICON, CBT_ICON} from 'src/@core/components/wallet/crypto-icons'
 
+import {amountShow} from 'src/@core/utils/amount'
+
 
 import { useEffect, useState } from "react"
 
@@ -70,8 +72,8 @@ const Wallet = () => {
             const cbNFTContract = new ethers.Contract(CBNFTContractAddress(chainId), CBNFTContract.abi, provider.getSigner())
             provider.getSigner().getAddress().then(async (address) => {
                 try {
-                    setBNBAmount(ethers.utils.formatEther(await provider.getBalance(address)))
-                    setBUSDAmount(ethers.utils.formatEther(await busdContract.balanceOf(address)))
+                    setBNBAmount(amountShow(await provider.getBalance(address)))
+                    setBUSDAmount(amountShow(await busdContract.balanceOf(address)))
                     setCBAmount(await cbtContract.balanceOf(address) + '')
                     setCBNFTItems(await cbNFTContract.getMyBlessingsURI())
                 } catch (err) {
@@ -140,8 +142,8 @@ const Wallet = () => {
                     <CardContent>
                         { CBNFTItems.length > 0 ?
                         <ImageList sx={{ width: 500, height: 450 }} cols={3} rowHeight={164}>
-                        {CBNFTItems.map((item) => (
-                            <ImageListItem key={item}>
+                        {CBNFTItems.map((item, index) => (
+                            <ImageListItem key={item + '-' + index}>
                             <img
                                 src={`${item}?w=164&h=164&fit=crop&auto=format`}
                                 srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
