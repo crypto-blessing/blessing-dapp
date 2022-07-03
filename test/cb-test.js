@@ -142,9 +142,9 @@ describe("CryptoBlessing", function () {
         expect(senderBUSD).to.equal(BigInt(190 * 10 ** 18));
         let cbBUSD = await BUSD.balanceOf(cryptoBlessing.address);
         console.log("after send cbBUSD: ", cbBUSD);
-        expect(cbBUSD).to.equal(BigInt(200 * 10 ** 18));
+        expect(cbBUSD).to.equal(BigInt(200 * 10 ** 18 + 10 * 10 / 100 * 10 ** 18));
         let blessingOwnerBUSD = await BUSD.balanceOf(blessingOwner.address);
-        expect(blessingOwnerBUSD).to.equal(BigInt(10 * 10 ** 18));
+        expect(blessingOwnerBUSD).to.equal(BigInt(10 * 90 / 100 * 10 ** 18));
 
         let mySendedBlessings = await cryptoBlessing.getMySendedBlessings()
         expect(mySendedBlessings.length).to.equal(1);

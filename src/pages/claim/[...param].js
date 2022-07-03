@@ -22,6 +22,9 @@ import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack';
 import Modal from '@mui/material/Modal';
 import CardMedia from '@mui/material/CardMedia'
+import CircularProgress from '@mui/material/CircularProgress';
+
+import { green } from '@mui/material/colors';
 
 import Paper from '@mui/material/Paper'
 import Table from '@mui/material/Table'
@@ -134,6 +137,8 @@ const ClaimPage = () => {
   const [claiming, setClaiming] = useState(false);
   const [claimSuccessOpen, setClaimSuccessOpen] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const [revoking, setRevoking] = useState(false)
 
   const [claimResult, setClaimResult] = useState({})
@@ -168,6 +173,7 @@ const ClaimPage = () => {
         setBlessing(result[0])
         setBlessingSended(result[1])
         setClaimList(transClaimListFromWalletClaims(result[2]))
+        setLoading(false);
       } catch (err) {
         console.log("Error: ", err)
         window.location.replace("/pages/404")
@@ -226,6 +232,7 @@ const ClaimPage = () => {
       localStorage.setItem('my_claimed_' + blessingSended.blessingID, 1)
       setClaimSuccessOpen(true)
       setAlreadyClaimed(true)
+      setLoading(true);
     } catch (e) {
       console.log(e)
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
@@ -433,9 +440,25 @@ const ClaimPage = () => {
 
             { active && sender !== account ?
             <Stack direction="row" spacing={1}>
-              <Button disabled={claiming || claimKey == '' || alreadyClaimed} onClick={claimBlessing} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
-                Claim Blessing
-              </Button>
+              <Box sx={{ m: 1, position: 'relative' }}>
+                <Button disabled={claiming || claimKey == '' || alreadyClaimed} onClick={claimBlessing} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                  {loading ? 'Waiting for claim transaction...' : 'Claim Blessing'}
+                </Button>
+                {loading && (
+                  <CircularProgress
+                    size={24}
+                    sx={{
+                      color: green[500],
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      marginTop: '-12px',
+                      marginLeft: '-12px',
+                    }}
+                  />
+                )}
+              </Box>
+             
             </Stack>
               :
               ''

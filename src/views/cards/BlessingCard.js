@@ -42,6 +42,8 @@ import { useWeb3React } from "@web3-react/core"
 import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
 import BUSDContract from 'src/artifacts/contracts/TestBUSD.sol/BUSD.json'
 
+const Web3 = require('web3');
+
 
 const style = {
   position: 'absolute',
@@ -69,7 +71,7 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
 
 const BlessingCard = (props) => {
 
-  const { active, chainId } = useWeb3React()
+  const { active, chainId, account } = useWeb3React()
 
   const [open, setOpen] = useState(false);
   const [tokenAmount, setTokenAmount] = useState(0);
@@ -78,12 +80,14 @@ const BlessingCard = (props) => {
   const [claimType, setClaimType] = useState(-1);
   const handleOpen = () => setOpen(true);
 
+  const [needApproveBUSDAmount, setNeedApproveBUSDAmount] = useState(BigInt(0))
 
   const [alertMsg, setAlertMsg] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
 
 
   const [sending, setSending] = useState(false);
+  const [approving, setApproving] = useState(false);
   const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
   const [blessingKeypairAddress, setBlessingKeypairAddress] = useState('');
 
@@ -93,6 +97,8 @@ const BlessingCard = (props) => {
     setTokenAmount(0)
     setClaimQuantity(0)
     setClaimType(-1)
+    setSending(false)
+    setApproving(false)
   }
 
   const handleTokenAmountChange = (event) => {
@@ -142,36 +148,76 @@ const BlessingCard = (props) => {
       }
     }
     setBlessingCaption(payCaption + claimCaption)
+
+    // need approve BUSD amount
+    const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+    provider.getSigner().getAddress().then(async (address) => {
+      try {
+          const busdAllownce = ethers.utils.formatEther(await busdContract.allowance(address, cryptoBlessingAdreess(chainId)))
+          setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce) * 10 ** 18))
+      } catch (err) {
+          console.log("Error: ", err)
+      }
+    })
   }
 
-  async function submitSendBlessing() {
+  const checkFormValidate = () => {
     if (tokenAmount <= 0 || BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
       setAlertMsg('You have insufficient BUSD balance.')
       setAlertOpen(true);
 
-      return
+      return false
     }
     if (claimQuantity <= 0 || claimQuantity > 1000) {
       setAlertMsg('You only have up to 1,000 friends to collect your BUSD')
       setAlertOpen(true);
 
-      return
+      return false
     }
     if (claimType === -1) {
       setAlertMsg('Pls choose the way your friend will claim your BUSD')
       setAlertOpen(true);
 
+      return false
+    }
+
+    return true
+  }
+
+  async function approveBUSD() {
+    if (!checkFormValidate()) {
+      return
+    }
+    setApproving(true)
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+    try {
+      const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
+      await tx.wait()
+      setApproving(false)
+    } catch (e) {
+      console.log(e)
+      setApproving(false)
+    }
+    
+  }
+
+  async function submitSendBlessing() {
+    if (!checkFormValidate()) {
       return
     }
     setSending(true)
-
+    
     // start to send blessing
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
     const blessingKeypair = ethers.Wallet.createRandom();
-    const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+
+    // const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
     try {
-      await busdContract.approve(cryptoBlessingAdreess(chainId), BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18));
+      // await busdContract.approve(cryptoBlessingAdreess(chainId), BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18));
       
       const sendBlessingTx = await cbContract.sendBlessing(
         props.blessing.image, blessingKeypair.address, 
@@ -235,6 +281,24 @@ const BlessingCard = (props) => {
     fetchBUSDAmount()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chainId])
+
+
+  useEffect(() => {
+    if (chainId) {
+      const web3 = new Web3(window.ethereum)
+      const busdContract = new web3.eth.Contract(BUSDContract.abi, BUSDContractAddress(chainId))
+      busdContract.events.Approval({
+        filter: {
+          owner: account,
+          spender: cryptoBlessingAdreess(chainId),
+        }
+      }).on('data', event => {
+        console.log('event', event)
+        const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
+        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - event.returnValues.value) * 10 ** 18))
+      })
+    }
+  }, [chainId, account, claimQuantity, props.blessing.price, tokenAmount])
 
   return (
     <Card>
@@ -391,9 +455,17 @@ const BlessingCard = (props) => {
               <Button onClick={handleClose} size='large' color='secondary' variant='outlined'>
                 Cancel
               </Button>
+              {needApproveBUSDAmount > 0 
+              ?
+              <Button onClick={approveBUSD} disabled={approving} color='info' size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                Approve BUSD
+              </Button>
+              :
               <Button onClick={submitSendBlessing} disabled={sending} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
                 Send Blessing
               </Button>
+              }
+              
             </CardActions>
           </Card>
         </Box>

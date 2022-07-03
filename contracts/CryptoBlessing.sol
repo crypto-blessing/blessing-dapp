@@ -28,6 +28,8 @@ contract CryptoBlessing is Ownable {
 
     uint256 CLAIM_TAX_RATE = 10; // 1000
 
+    uint256 DESIGNER_TAX_RATE = 10; // 100
+
     event claimerClaimComplete(address sender, address blessingID);
 
     event senderRevokeComplete(address sender, address blessingID);
@@ -201,7 +203,9 @@ contract CryptoBlessing is Ownable {
         require(IERC20(sendTokenAddress).balanceOf(msg.sender) >= tokenAmount.add((claimQuantity.mul(choosedBlessing.price))), "Your token amount must be greater than you are trying to send!");
         // require(IERC20(sendTokenAddress).approve(address(this), tokenAmount), "Approve failed!");
         require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), tokenAmount), "Transfer to contract failed!");
-        require(IERC20(sendTokenAddress).transferFrom(msg.sender, choosedBlessing.owner, claimQuantity.mul(choosedBlessing.price)), "Transfer to the owner of blessing failed!");
+
+        require(IERC20(sendTokenAddress).transferFrom(msg.sender, choosedBlessing.owner, claimQuantity.mul(choosedBlessing.price).mul(100 - DESIGNER_TAX_RATE).div(100)), "Transfer to the owner of blessing failed!");
+        require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), claimQuantity.mul(choosedBlessing.price).mul(DESIGNER_TAX_RATE).div(100)), "Transfer to the contract failed!");
 
         senderBlessingMapping[msg.sender].push(SenderBlessing(
             blessingID,
@@ -314,7 +318,11 @@ contract CryptoBlessing is Ownable {
     }
 
     function _random(uint number) internal view returns(uint){
-        return uint(blockhash(block.number-1)) % number;
+        uint rand = uint(blockhash(block.number-1)) % number;
+        if (rand == 0 || rand == 10) {
+            rand = 1;
+        }
+        return rand;
     }
 
     function _verify(bytes32 data, bytes memory signature, address account) internal pure returns (bool) {
