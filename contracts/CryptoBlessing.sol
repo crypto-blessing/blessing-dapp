@@ -28,8 +28,6 @@ contract CryptoBlessing is Ownable {
 
     uint256 CLAIM_TAX_RATE = 10; // 1000
 
-    uint256 DESIGNER_TAX_RATE = 10; // 100
-
     event claimerClaimComplete(address sender, address blessingID);
 
     event senderRevokeComplete(address sender, address blessingID);
@@ -135,6 +133,7 @@ contract CryptoBlessing is Ownable {
         uint8 blessingType;
         uint256 timestamp;
         uint8 deleted;
+        uint256 taxRate; // 100
     }
     Blessing[] public blessingList;
 
@@ -147,29 +146,21 @@ contract CryptoBlessing is Ownable {
         address blessingOwner,
         string memory description,
         uint256 price,
-        uint8 blessingType
+        uint8 blessingType,
+        uint256 taxRate
     ) public onlyOwner {
         console.log("start to add blessing to the pool!");
         blessingList.push(Blessing(
-            image, description, price, blessingOwner, blessingType, block.timestamp, 0
+            image, description, price, blessingOwner, blessingType, block.timestamp, 0, taxRate
         ));
     }
 
-    function removeBlessing(string memory image) public onlyOwner {
+    function updateBlessing(string memory image, uint8 deleted, uint256 taxRate) public onlyOwner {
         console.log("start to remove one blessing from the pool! image:%s", image);
         for (uint256 i = 0; i < blessingList.length; i ++) {
             if (compareStrings(blessingList[i].image, image)) {
-                blessingList[i].deleted = 1;
-                break;
-            }
-        }
-    }
-
-    function recoverBlessing(string memory image) public onlyOwner {
-        console.log("start to recover one blessing from the pool! image:%s", image);
-        for (uint256 i = 0; i < blessingList.length; i ++) {
-            if (compareStrings(blessingList[i].image, image)) {
-                blessingList[i].deleted = 0;
+                blessingList[i].deleted = deleted;
+                blessingList[i].taxRate = taxRate;
                 break;
             }
         }
@@ -204,8 +195,8 @@ contract CryptoBlessing is Ownable {
         // require(IERC20(sendTokenAddress).approve(address(this), tokenAmount), "Approve failed!");
         require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), tokenAmount), "Transfer to contract failed!");
 
-        require(IERC20(sendTokenAddress).transferFrom(msg.sender, choosedBlessing.owner, claimQuantity.mul(choosedBlessing.price).mul(100 - DESIGNER_TAX_RATE).div(100)), "Transfer to the owner of blessing failed!");
-        require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), claimQuantity.mul(choosedBlessing.price).mul(DESIGNER_TAX_RATE).div(100)), "Transfer to the contract failed!");
+        require(IERC20(sendTokenAddress).transferFrom(msg.sender, choosedBlessing.owner, claimQuantity.mul(choosedBlessing.price).mul(100 - choosedBlessing.taxRate).div(100)), "Transfer to the owner of blessing failed!");
+        require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), claimQuantity.mul(choosedBlessing.price).mul(choosedBlessing.taxRate).div(100)), "Transfer to the contract failed!");
 
         senderBlessingMapping[msg.sender].push(SenderBlessing(
             blessingID,

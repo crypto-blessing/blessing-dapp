@@ -43,14 +43,14 @@ describe("CryptoBlessing", function () {
         expect(allBlessings.length).to.equal(0);
 
         // add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, "gong xi fa cai", BigInt(1 * 10 ** 18), 1);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, "gong xi fa cai", BigInt(1 * 10 ** 18), 1, 10);
         await addBlessingTx.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(1);
         expect(allBlessings[0].image).to.equal("blessing image");
 
         // add another blessing to the pool
-        const addBlessingTx2 = await cryptoBlessing.addBlessing("make love, not war", owner.address, "make love, not war", BigInt(9.9 * 10 ** 18), 2);
+        const addBlessingTx2 = await cryptoBlessing.addBlessing("make love, not war", owner.address, "make love, not war", BigInt(9.9 * 10 ** 18), 2, 10);
         await addBlessingTx2.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(2);
@@ -58,14 +58,14 @@ describe("CryptoBlessing", function () {
         expect(allBlessings[1].deleted).to.equal(0);
 
         // remove blessing from the pool
-        const removeBlessingTx = await cryptoBlessing.removeBlessing(allBlessings[0].image);
+        const removeBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, 1, 10);
         await removeBlessingTx.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(2);
         expect(allBlessings[0].deleted).to.equal(1);
 
         // recover blessing from the pool
-        const recoverBlessingTx = await cryptoBlessing.recoverBlessing(allBlessings[0].image);
+        const recoverBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, 0, 10);
         await recoverBlessingTx.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings[0].deleted).to.equal(0);
@@ -86,7 +86,7 @@ describe("CryptoBlessing", function () {
         // add blessing to the pool
         let err = "";
         try {
-            await cryptoBlessing.connect(anotherAddress).addBlessing("blessing image", owner.address,  "gong xi fa cai", BigInt(1 * 10 ** 18), 1);
+            await cryptoBlessing.connect(anotherAddress).addBlessing("blessing image", owner.address,  "gong xi fa cai", BigInt(1 * 10 ** 18), 1, 10);
         } catch(e) {
             err = e.message;
         }
@@ -95,7 +95,7 @@ describe("CryptoBlessing", function () {
 
         // remove blessing from the pool
         try {
-            await cryptoBlessing.connect(anotherAddress).removeBlessing("test image");
+            await cryptoBlessing.connect(anotherAddress).updateBlessing("test image", 1, 10);
         } catch(e) {
             err = e.message;
         }
@@ -122,7 +122,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
         await addBlessingTx.wait();
 
         // 2 check the balance of the sender BUSD = 400
@@ -190,7 +190,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
         await addBlessingTx.wait();
 
         // 2 send blessing
@@ -266,7 +266,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
         await addBlessingTx.wait();
 
         // 2 check the balance of the sender BUSD = 400
@@ -334,7 +334,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
         await addBlessingTx.wait();
 
         // 2 send blessing
@@ -403,6 +403,23 @@ describe("CryptoBlessing", function () {
         await claim5BlessingTx.wait();
         let claimer5BUSD = await BUSD.balanceOf(claimer5.address);
         console.log("claimer5BUSD: ", ethers.utils.formatEther(claimer5BUSD));
+
+        console.log("totalBUSD: ", parseFloat(ethers.utils.formatEther(claimer1BUSD)) 
+            + parseFloat(ethers.utils.formatEther(claimer2BUSD))
+            + parseFloat(ethers.utils.formatEther(claimer3BUSD)) 
+            + parseFloat(ethers.utils.formatEther(claimer4BUSD)) 
+            + parseFloat(ethers.utils.formatEther(claimer5BUSD)));
+
+    });
+
+    it("Safe Math?", async function () {
+    
+        // const SafeMath = await ethers.getContractFactory("SafeMath");
+        // safeMath = await SafeMath.deploy();
+        // await safeMath.deployed();
+
+        // const atanSmall = await safeMath.atanSmall(10);
+        // console.log("atanSmall: ", atanSmall);
 
     });
 
