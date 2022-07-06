@@ -6,14 +6,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "hardhat/console.sol";
 
 interface ICryptoBlessingNFT {
     function awardBlessingNFT(address claimer, string memory blessingURI) external returns (uint256);
+    function transferOwnership(address newOwner) external;
 }
 
-contract CryptoBlessing is Ownable {
+contract CryptoBlessing is Ownable, Pausable {
 
     using SafeMath for uint256;
 
@@ -24,9 +25,11 @@ contract CryptoBlessing is Ownable {
     // nft
     address cryptoBlessingNFTAddress;
 
-    uint256 CBTOKENAWARDRATIO = 10;
+    uint256 CBTOKENAWARDRATIO = 5;
 
     uint256 CLAIM_TAX_RATE = 10; // 1000
+
+    event senderSendCompleted(address sender, address blessingID);
 
     event claimerClaimComplete(address sender, address blessingID);
 
@@ -155,11 +158,12 @@ contract CryptoBlessing is Ownable {
         ));
     }
 
-    function updateBlessing(string memory image, uint8 deleted, uint256 taxRate) public onlyOwner {
+    function updateBlessing(string memory image, uint256 price, uint8 deleted, uint256 taxRate) public onlyOwner {
         console.log("start to remove one blessing from the pool! image:%s", image);
         for (uint256 i = 0; i < blessingList.length; i ++) {
             if (compareStrings(blessingList[i].image, image)) {
                 blessingList[i].deleted = deleted;
+                blessingList[i].price = price;
                 blessingList[i].taxRate = taxRate;
                 break;
             }
@@ -176,7 +180,7 @@ contract CryptoBlessing is Ownable {
         uint256 tokenAmount,
         uint256 claimQuantity,
         ClaimType claimType
-    ) public {
+    ) public whenNotPaused {
         console.log("start to send blessing! image:%s, blessingID:%s", image, blessingID);
         console.log("tokenAmount: %s", tokenAmount);
         console.log("claimQuantity: %s", claimQuantity);
@@ -207,9 +211,11 @@ contract CryptoBlessing is Ownable {
             claimType,
             false
         ));
+
+        emit senderSendCompleted(msg.sender, blessingID);
     }
 
-    function revokeBlessing(address blessingID) public {
+    function revokeBlessing(address blessingID) public whenNotPaused {
         BlessingClaimStatus[] memory blessingClaimStatusList = blessingClaimStatusMapping[blessingID];
         require(blessingClaimStatusList.length == 0, "Your blessing is claiming by others. Can not revoke anymore!");
 
@@ -235,7 +241,7 @@ contract CryptoBlessing is Ownable {
         address blessingID,
         bytes32 hash,
         bytes memory signature
-    ) payable public returns (ClaimerBlessing memory){
+    ) payable public whenNotPaused returns (ClaimerBlessing memory){
         console.log("start to claim blessing! sender:%s, blessingID:%s", sender, blessingID);
         require(_verify(hash, signature, blessingID), "Invalid signiture!");
         console.log("signature is valid!");
@@ -272,18 +278,6 @@ contract CryptoBlessing is Ownable {
             }
         }
 
-        require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount.div(1000).mul(1000 - CLAIM_TAX_RATE)), "Claim the token failed!");
-        require(IERC20(sendTokenAddress).transfer(owner(), distributionAmount.div(1000).mul(CLAIM_TAX_RATE)), "Tansfer tax failed!");
-
-        uint256 CBTokenAward = distributionAmount.div(10 ** 18).mul(CBTOKENAWARDRATIO);
-        // award 10 CB tokens to the sender
-        if(IERC20(cryptoBlessingTokenAddress).balanceOf(address(this)) >= CBTokenAward) {
-            require(IERC20(cryptoBlessingTokenAddress).transfer(sender, CBTokenAward), "award CB tokens failed!");
-        }
-
-        // award blessing NFT.
-        ICryptoBlessingNFT(cryptoBlessingNFTAddress).awardBlessingNFT(msg.sender, choosedSenderBlessing.blessingImage);
-
         ClaimerBlessing memory claimerBlessing = ClaimerBlessing(
             sender,
             blessingID,
@@ -295,6 +289,11 @@ contract CryptoBlessing is Ownable {
 
         claimerBlessingMapping[msg.sender].push(claimerBlessing);
 
+        uint256 CBTokenAward = distributionAmount.div(10 ** 18).mul(CBTOKENAWARDRATIO);
+        if (CBTokenAward > 1000) {
+            CBTokenAward = 999;
+        }
+
         blessingClaimStatusMapping[blessingID].push(BlessingClaimStatus(
             msg.sender,
             block.timestamp,
@@ -303,6 +302,17 @@ contract CryptoBlessing is Ownable {
             distributionAmount.div(1000).mul(CLAIM_TAX_RATE),
             CBTokenAward
         ));
+
+        require(IERC20(sendTokenAddress).transfer(msg.sender, distributionAmount.div(1000).mul(1000 - CLAIM_TAX_RATE)), "Claim the token failed!");
+        require(IERC20(sendTokenAddress).transfer(owner(), distributionAmount.div(1000).mul(CLAIM_TAX_RATE)), "Tansfer tax failed!");
+        
+        // award 10 CB tokens to the sender
+        if(IERC20(cryptoBlessingTokenAddress).balanceOf(address(this)) >= CBTokenAward) {
+            require(IERC20(cryptoBlessingTokenAddress).transfer(sender, CBTokenAward), "award CB tokens failed!");
+        }
+
+        // award blessing NFT.
+        ICryptoBlessingNFT(cryptoBlessingNFTAddress).awardBlessingNFT(msg.sender, choosedSenderBlessing.blessingImage);
 
         emit claimerClaimComplete(sender, blessingID);
         return claimerBlessing;
@@ -319,6 +329,19 @@ contract CryptoBlessing is Ownable {
     function _verify(bytes32 data, bytes memory signature, address account) internal pure returns (bool) {
         address signatureAddress = ECDSA.recover(data, signature);
         return signatureAddress == account;
+    }
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function upgradeToV2(address v2ContractAddress) public onlyOwner whenPaused {
+        require(IERC20(cryptoBlessingTokenAddress).transfer(v2ContractAddress, IERC20(cryptoBlessingTokenAddress).balanceOf(address(this))), "Transfer CBT to v2 address failed!");
+        ICryptoBlessingNFT(cryptoBlessingNFTAddress).transferOwnership(v2ContractAddress);
     }
 
 }

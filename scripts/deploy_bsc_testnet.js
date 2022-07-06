@@ -8,13 +8,7 @@ const hre = require("hardhat");
 
 async function main() {
 
-    const BUSDC = await hre.ethers.getContractFactory("BUSD");
-    let BUSD = await BUSDC.deploy();
-    await BUSD.deployed();
-    console.log("Fake BUSD deployed to:", BUSD.address);
-    const transferBUSDTx = await BUSD.transfer('0x70997970C51812dc3A010C7d01b50e0d17dc79C8', BigInt(200 * 10 ** 18));
-    await transferBUSDTx.wait();
-
+    const BUSD_ADDRESS = '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7';
 
     const CBToken = await hre.ethers.getContractFactory("CryptoBlessingToken");
     let cbToken = await CBToken.deploy();
@@ -27,7 +21,7 @@ async function main() {
     console.log("CryptoBlessing NFT deployed to:", cbNFT.address);
 
     const CryptoBlessing = await hre.ethers.getContractFactory("CryptoBlessing");
-    let cryptoBlessing = await CryptoBlessing.deploy(BUSD.address, cbToken.address, cbNFT.address);
+    let cryptoBlessing = await CryptoBlessing.deploy(BUSD_ADDRESS, cbToken.address, cbNFT.address);
     await cryptoBlessing.deployed();
     console.log("CryptoBlessing core contract deployed to:", cryptoBlessing.address);
 
@@ -37,7 +31,7 @@ async function main() {
     // transfer the owner of CBNFT to the owner of CryptoBlessing.
     await cbNFT.transferOwnership(cryptoBlessing.address);
 
-    let addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png", "0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097", "gong xi fa cai#In every Chinese New Year, the greetings among Chinese", BigInt(0.1 * 10 ** 18), 1, 10);
+    let addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png", "0x8b2A30e4870B85c87B72a165910F932C87aEd856", "gong xi fa cai#In every Chinese New Year, the greetings among Chinese", BigInt(0.1 * 10 ** 18), 1, 10);
     await addBlessingTx.wait();
 
     // addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/tuo.png", "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", "脱，脱，脱!#The ultimate home for engineers", BigInt(1 * 10 ** 18), 3);

@@ -203,7 +203,7 @@ const ClaimPage = () => {
   const copyClaimLink = () => {
     const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingSended.blessingID)
 
-    navigator.clipboard.writeText(`🙏CryptoBlessing🙏 Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${encode(sender)}/${encode(blessingSended.blessingID)}/${encode(privateKey)} which sended by ${simpleShow(sender)}. May god bless you! 🙏`)
+    navigator.clipboard.writeText(`[CryptoBlessing] Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${encode(sender)}/${encode(blessingSended.blessingID)}/${encode(privateKey)} which sended by ${simpleShow(sender)}`)
     handleAlertOpen('Claim Link Copied!')
   }
 
@@ -267,6 +267,9 @@ const ClaimPage = () => {
     if (chainId && sender && blessingID) {
       const web3 = new Web3(window.ethereum)
       const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
+      console.log('event chainId', chainId)
+      console.log('event sender', sender)
+      console.log('event blessingID', blessingID)
       cbContract.events.claimerClaimComplete({
         filter: {
           sender: sender,
@@ -446,6 +449,7 @@ const ClaimPage = () => {
                 </Button>
                 {loading && (
                   <CircularProgress
+                    color="secondary"
                     size={24}
                     sx={{
                       color: green[500],

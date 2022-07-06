@@ -26,6 +26,9 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import Link from '@mui/material/Link';
 import Chip from '@mui/material/Chip';
+import CircularProgress from '@mui/material/CircularProgress';
+
+import { green } from '@mui/material/colors';
 
 // ** Icons Imports
 import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
@@ -90,6 +93,8 @@ const BlessingCard = (props) => {
   const [approving, setApproving] = useState(false);
   const [sendSuccessOpen, setSendSuccessOpen] = useState(false);
   const [blessingKeypairAddress, setBlessingKeypairAddress] = useState('');
+
+  const [loading, setLoading] = useState(false);
 
   const handleClose = () => {
     setOpen(false)
@@ -197,6 +202,7 @@ const BlessingCard = (props) => {
       const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
       await tx.wait()
       setApproving(false)
+      setLoading(true)
     } catch (e) {
       console.log(e)
       setApproving(false)
@@ -232,6 +238,7 @@ const BlessingCard = (props) => {
       setOpen(false)
       setSendSuccessOpen(true)
       fetchBUSDAmount()
+      setLoading(true);
     } catch (e) {
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
       setAlertOpen(true);
@@ -244,7 +251,7 @@ const BlessingCard = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getSigner().getAddress().then(async (address) => {
       const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
-      navigator.clipboard.writeText(`🙏CryptoBlessing🙏 Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${encode(address)}/${encode(blessingKeypairAddress)}/${encode(privateKey)} which sended by ${simpleShow(address)}. May god bless you! 🙏`)
+      navigator.clipboard.writeText(`[CryptoBlessing] Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${encode(address)}/${encode(blessingKeypairAddress)}/${encode(privateKey)} which sended by ${simpleShow(address)}`)
     })
   }
 
@@ -296,6 +303,20 @@ const BlessingCard = (props) => {
         console.log('event', event)
         const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
         setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - event.returnValues.value) * 10 ** 18))
+        setLoading(false)
+      })
+
+      // sended event
+      const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
+      cbContract.events.senderSendCompleted({
+        filter: {
+          sender: account,
+        }
+      }).on('data', event => {
+        console.log('event', event)
+        if (event.returnValues.sender == account) {
+          setLoading(false)
+        }
       })
     }
   }, [chainId, account, claimQuantity, props.blessing.price, tokenAmount])
@@ -457,13 +478,45 @@ const BlessingCard = (props) => {
               </Button>
               {needApproveBUSDAmount > 0 
               ?
-              <Button onClick={approveBUSD} disabled={approving} color='info' size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
-                Approve BUSD
-              </Button>
+              <Box sx={{ m: 1, position: 'relative' }}>
+                <Button onClick={approveBUSD} disabled={approving} color='info' size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                  {approving ? 'Waiting for approve transaction...' : 'Approve BUSD'}
+                </Button>
+                {approving && (
+                  <CircularProgress
+                    color="secondary"
+                    size={24}
+                    sx={{
+                      color: 'green[500]',
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      marginTop: '-12px',
+                      marginLeft: '-12px',
+                    }}
+                  />
+                )}
+              </Box>
               :
-              <Button onClick={submitSendBlessing} disabled={sending} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
-                Send Blessing
-              </Button>
+              <Box sx={{ m: 1, position: 'relative' }}>
+                <Button onClick={submitSendBlessing} disabled={sending} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+                  {sending ? 'Waiting for send transaction...' : 'Send Blessing'}
+                </Button>
+                {sending && (
+                  <CircularProgress
+                    color="secondary"
+                    size={24}
+                    sx={{
+                      color: green[500],
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      marginTop: '-12px',
+                      marginLeft: '-12px',
+                    }}
+                  />
+                )}
+              </Box>
               }
               
             </CardActions>

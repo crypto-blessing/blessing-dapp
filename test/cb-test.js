@@ -58,14 +58,14 @@ describe("CryptoBlessing", function () {
         expect(allBlessings[1].deleted).to.equal(0);
 
         // remove blessing from the pool
-        const removeBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, 1, 10);
+        const removeBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, BigInt(1 * 10 ** 18), 1, 10);
         await removeBlessingTx.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(2);
         expect(allBlessings[0].deleted).to.equal(1);
 
         // recover blessing from the pool
-        const recoverBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, 0, 10);
+        const recoverBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, BigInt(9.9 * 10 ** 18), 0, 10);
         await recoverBlessingTx.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings[0].deleted).to.equal(0);
@@ -95,7 +95,7 @@ describe("CryptoBlessing", function () {
 
         // remove blessing from the pool
         try {
-            await cryptoBlessing.connect(anotherAddress).updateBlessing("test image", 1, 10);
+            await cryptoBlessing.connect(anotherAddress).updateBlessing("test image", BigInt(0.9 * 10 ** 18), 1, 10);
         } catch(e) {
             err = e.message;
         }
@@ -230,7 +230,7 @@ describe("CryptoBlessing", function () {
         expect(blessingClaimingStatus.length).to.equal(1);
         console.log("blessingClaimingStatus: ", blessingClaimingStatus);
         let senderCB = await cbToken.balanceOf(sender.address);
-        expect(senderCB).to.equal(BigInt(200));
+        expect(senderCB).to.equal(BigInt(100));
 
         // check the nft
         cbNFTCount = await cbNFT.balanceOf(claimer.address)
@@ -412,15 +412,34 @@ describe("CryptoBlessing", function () {
 
     });
 
-    it("Safe Math?", async function () {
-    
-        // const SafeMath = await ethers.getContractFactory("SafeMath");
-        // safeMath = await SafeMath.deploy();
-        // await safeMath.deployed();
+    it("Upgrade to V2?", async function () {
+        // deploy contracts
+        await deployCBToken();
+        await deployCBNFT();
+        await deployBUSD();
+        await deployCryptoBlessing();
 
-        // const atanSmall = await safeMath.atanSmall(10);
-        // console.log("atanSmall: ", atanSmall);
+        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
+        await transferCBTx.wait();
 
+        // transfer the owner of CBNFT to the owner of CryptoBlessing.
+        await cbNFT.transferOwnership(cryptoBlessing.address);
+
+        const CryptoBlessing2 = await ethers.getContractFactory("CryptoBlessing");
+        let cryptoBlessing2 = await CryptoBlessing2.deploy(BUSD.address, cbToken.address, cbNFT.address);
+        await cryptoBlessing2.deployed();
+
+        let  blessingCB = await cbToken.balanceOf(cryptoBlessing2.address);
+        console.log("blessingCB: ", blessingCB);
+
+        const pausedTx = await cryptoBlessing.pause();
+        await pausedTx.wait();
+
+        const upgradeToV2Tx = await cryptoBlessing.upgradeToV2(cryptoBlessing2.address);
+        await upgradeToV2Tx.wait();
+
+        blessingCB = await cbToken.balanceOf(cryptoBlessing2.address);
+        console.log("blessingCB: ", blessingCB);
     });
 
 });
