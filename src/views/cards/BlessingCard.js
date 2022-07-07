@@ -128,15 +128,12 @@ const BlessingCard = (props) => {
         localClaimType = 1
         break;
     }
-    console.log("localClaimType", localClaimType)
     setClaimType(localClaimType)
     handleBlessingCaption(tokenAmount, claimQuantity, localClaimType)
   }
 
   const handleBlessingCaption = (tokenAmount, claimQuantity, claimType) => {
     let payCaption = '', claimCaption = '';
-    console.log(tokenAmount, claimQuantity, claimType)
-    console.log('ethers.utils.formatEther(props.blessing.price', ethers.utils.formatEther(props.blessing.price))
     if (tokenAmount > 0 && claimQuantity > 0) {
       let totalPay = (claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount)
       payCaption = `You will pay ${totalPay} BUSD. `
@@ -164,7 +161,7 @@ const BlessingCard = (props) => {
       try {
         const allowance = await busdContract.allowance(address, cryptoBlessingAdreess(chainId))
         const busdAllownce = ethers.utils.formatEther(allowance)
-        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce).toFixed(2) * 1.5 * 10 ** 18))
+        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce).toFixed(2) * 2 * 10 ** 18))
       } catch (err) {
           console.log("Error: ", err)
       }
@@ -272,7 +269,6 @@ const BlessingCard = (props) => {
   const [busdAmount, setBusdAmount] = useState(0)
 
   async function fetchBUSDAmount() {
-    console.log('chainId', chainId)
     if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
@@ -296,6 +292,7 @@ const BlessingCard = (props) => {
   useEffect(() => {
     if (chainId) {
       const web3 = getWeb3(chainId)
+      
       const busdContract = new web3.eth.Contract(BUSDContract.abi, BUSDContractAddress(chainId))
       busdContract.events.Approval({
         filter: {
@@ -311,6 +308,7 @@ const BlessingCard = (props) => {
 
       // sended event
       const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
+
       cbContract.events.senderSendCompleted({
         filter: {
           sender: account,
@@ -321,12 +319,20 @@ const BlessingCard = (props) => {
           setLoading(false)
         }
       })
+
+      cbContract.events.senderRevokeComplete({
+        filter: {
+          sender: account
+        }
+      }).on('data', event => {
+        console.log('senderRevokeComplete event', event)
+      })
     }
   }, [chainId, account, claimQuantity, props.blessing.price, tokenAmount])
 
   return (
     <Card>
-      <CardMedia sx={{ height: '22rem' }} image={props.blessing.image} />
+      <CardMedia sx={{ height: '26rem' }} image={'/images/blessings/items/' + props.blessing.image} />
       <CardContent>
         <Typography variant='h6' sx={{ marginBottom: 2 }}>
           {getBlessingTitle(props.blessing.description)}
@@ -375,7 +381,7 @@ const BlessingCard = (props) => {
             <Grid container spacing={6}>
               <StyledGrid item md={5} xs={12}>
                 <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img width={137} height={137} alt='CryptoBlessing' src={props.blessing.image} />
+                  <img width={137} height={137} alt='CryptoBlessing' src={'/images/blessings/items/' + props.blessing.image} />
                 </CardContent>
               </StyledGrid>
               <Grid

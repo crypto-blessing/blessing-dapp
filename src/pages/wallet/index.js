@@ -64,7 +64,6 @@ const Wallet = () => {
     const [CBNFTItems, setCBNFTItems] = useState([])
 
     async function fetchERC20Amount() {
-        console.log('chainId', chainId)
         if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
@@ -145,8 +144,8 @@ const Wallet = () => {
                         {CBNFTItems.map((item, index) => (
                             <ImageListItem key={item + '-' + index}>
                             <img
-                                src={`${item}?w=164&h=164&fit=crop&auto=format`}
-                                srcSet={`${item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                src={`${'/images/blessings/items/' + item}?w=164&h=164&fit=crop&auto=format`}
+                                srcSet={`${'/images/blessings/items/' + item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
                                 alt={item.title}
                                 loading="lazy"
                             />

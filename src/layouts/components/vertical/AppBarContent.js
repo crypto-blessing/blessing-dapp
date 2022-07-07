@@ -30,24 +30,20 @@ const AppBarContent = props => {
   const { active, account, library, connector, activate, deactivate, chainId } = useWeb3React()
 
   async function connect() {
-    console.log("connecting")
     try {
       injected.isAuthorized().then((isAuthorized) => {
         if (isAuthorized) {
           activate(injected, undefined, true).catch((e) => {
-            console.log("UnsupportedChainIdError")
             setOpen(true);
           });
         } else {
           console.log("not authorized")
         }
-        console.log(connector)
       });
       localStorage.setItem('isWalletConnected', true)
     } catch (ex) {
       console.log(ex)
     }
-    console.log("connected", account)
   }
 
   async function disconnect() {
@@ -69,7 +65,6 @@ const AppBarContent = props => {
   useEffect(() => {
     const connectWalletOnPageLoad = async () => {
       if (localStorage?.getItem('isWalletConnected') === 'true') {
-        console.log("connecting wallet")
         try {
           await activate(injected)
           localStorage.setItem('isWalletConnected', true)

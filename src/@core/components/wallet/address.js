@@ -21,7 +21,7 @@ export const cryptoBlessingAdreess = (chainId) => {
         case 56:
             return 'BSC-Mainnet';
         case 97:
-            return '0xd91a16e0579A709e635d69B5eE0BbeeaE7C0Ab85';
+            return '0x79f6D9076D24EeD88D3711eaBF8Ed67C1F82dAF7';
         case 1337:
             return '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0';
         default:
@@ -33,13 +33,13 @@ export const cryptoBlessingAdreess = (chainId) => {
 export const BUSDContractAddress = (chainId) => {
     switch (chainId) {
         case 56:
-            return 'BSC-Mainnet';
+            return '0xe9e7cea3dedca5984780bafc599bd69add087d56';
         case 97:
             return '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7';
         case 1337:
             return '0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6';
         default:
-            return 'BSC-Mainnet';
+            return '0xe9e7cea3dedca5984780bafc599bd69add087d56';
     }
 }
 
@@ -48,7 +48,7 @@ export const CBTContractAddress = (chainId) => {
         case 56:
             return 'BSC-Mainnet';
         case 97:
-            return '0xE8A5A8bdb45b9f65A16c455Fd74e4eA0A7A059ad';
+            return '0xd714e21932BAE2aF5F88793924DCdA76B072fBCC';
         case 1337:
             return '0x610178dA211FEF7D417bC0e6FeD39F05609AD788';
         default:
@@ -61,7 +61,7 @@ export const CBNFTContractAddress = (chainId) => {
         case 56:
             return 'BSC-Mainnet';
         case 97:
-            return '0xDA82c8e0B7ABbacDc638317a515096530C7Fa327';
+            return '0xcf1e0102e08517207D3bb91EcB0a1a073EdFD410';
         case 1337:
             return '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e';
         default:

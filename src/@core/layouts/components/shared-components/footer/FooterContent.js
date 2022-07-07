@@ -6,6 +6,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import Twitter from 'mdi-material-ui/Twitter'
 import Telegram from '@mui/icons-material/Telegram';
 import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button';
 
 const FooterContent = () => {
   // ** Var
@@ -22,6 +23,7 @@ const FooterContent = () => {
         <Link href='/'>
           CryptoBlessing
         </Link>
+        <Button href="https://cryptoblessing.gitbook.io/welcome-to-cryptoblessing/" target='_blank'>White Paper</Button>
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Link target='_blank' href='https://twitter.com/cryptoblessing4'>

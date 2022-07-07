@@ -113,7 +113,6 @@ const ClaimPage = () => {
   // ** Hook
   useEffect (() => {
     let params = router.query
-    console.log('params', params.param?.length)
     if (params.param?.length === 2 || params.param?.length === 3) {
       setSender(decode(params.param[0]))
       setBlessingID(decode(params.param[1]))
@@ -121,7 +120,6 @@ const ClaimPage = () => {
         setClaimKey(decode(params.param[2]))
       }
       if (localStorage.getItem('my_claimed_' + decode(params.param[1])) === '1' || localStorage.getItem('my_blessing_claim_key_' + decode(params.param[1])) != undefined) {
-        console.log('already claimed')
         setAlreadyClaimed(true)
       }
     }
@@ -163,13 +161,10 @@ const ClaimPage = () => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   async function featchAllInfoOfBlessing(provider) {
-    console.log('featchAllInfoOfBlessing', sender)
     if (sender != '' && active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
       const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
       try {
-        console.log('start', sender)
         const result = await cbContract.getAllInfoOfBlessing(sender, blessingID)
-        console.log('result', result)
         setBlessing(result[0])
         setBlessingSended(result[1])
         setClaimList(transClaimListFromWalletClaims(result[2]))
@@ -245,34 +240,31 @@ const ClaimPage = () => {
     window.location.replace("/wallet")
   }
 
-  useEffect(() => {
-    console.log('start featchAllInfoOfBlessing')
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    setBlessing({
-      image: "/images/logo.png",
-      description: "Crypto Blessing#Blessing is the most universal human expression of emotion, and we are NFTizing it.",
-    })
-    setBlessingSended({
-      tokenAmount: BigInt(0.1 * 10 ** 18),
-      claimQuantity: 0,
-      sendTimestamp: BigInt(1656544299),
-    })
-    setClaimList([])
-    featchAllInfoOfBlessing(provider)
+  // useEffect(() => {
+  //   setBlessing({
+  //     image: "/images/logo.png",
+  //     description: "Crypto Blessing#Blessing is the most universal human expression of emotion, and we are NFTizing it.",
+  //   })
+  //   setBlessingSended({
+  //     tokenAmount: BigInt(0.1 * 10 ** 18),
+  //     claimQuantity: 0,
+  //     sendTimestamp: BigInt(1656544299),
+  //   })
+  //   setClaimList([])
+  //   featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sender, chainId, account])
+  // // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [sender, chainId])
 
   useEffect(() => {
-    if (chainId && sender && blessingID) {
-      
-      
+    if (chainId) {
       const web3 = getWeb3(chainId)
-
       const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
+
       cbContract.events.claimerClaimComplete({
         filter: {
           sender: sender,
+          blessingID: blessingID,
         }
       }).on('data', event => {
         console.log('claimerClaimComplete event', event)
@@ -288,13 +280,17 @@ const ClaimPage = () => {
         }
       }).on('data', event => {
         console.log('senderRevokeComplete event', event)
+
         if (event.returnValues.sender == sender && event.returnValues.blessingID == blessingID) {
           blessingSended.revoked = true
           setBlessingSended(blessingSended)
         }
       })
+
+      featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
     }
-  }, [chainId, blessingID, sender, featchAllInfoOfBlessing, blessingSended])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainId, blessingID, sender])
 
   return (
     <Grid container spacing={6}>
@@ -314,7 +310,7 @@ const ClaimPage = () => {
             <Avatar
               sx={{ width: 150, height: 150, marginBottom: 2.25, color: 'common.white', backgroundColor: 'primary.main' }}
             >
-              <img width={150} height={150} alt='CryptoBlessing' src={blessing.image} />
+              <img width={150} height={150} alt='CryptoBlessing' src={'/images/blessings/items/' + blessing.image} />
             </Avatar>
             <Typography variant='h6' sx={{ marginBottom: 2.75 }}>
             {getBlessingTitle(blessing.description)}
@@ -351,7 +347,7 @@ const ClaimPage = () => {
                         <Stack direction="row" spacing={1}>
                           <Chip variant="outlined" color="warning" label={row.amount} icon={<BUSD_ICON />} />
                           <Chip
-                            avatar={<Avatar alt="CryptoBlessing" src={blessing.image} />}
+                            avatar={<Avatar alt="CryptoBlessing" src={'/images/blessings/items/' + blessing.image} />}
                             label="1"
                             variant="outlined"
                           />

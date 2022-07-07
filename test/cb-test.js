@@ -127,7 +127,6 @@ describe("CryptoBlessing", function () {
 
         // 2 check the balance of the sender BUSD = 400
         let senderBUSD = await BUSD.balanceOf(owner.address);
-        console.log("senderBUSD: ", senderBUSD);
 
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.sendBlessing(

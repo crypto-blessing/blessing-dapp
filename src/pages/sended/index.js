@@ -60,14 +60,12 @@ const BlessingSended = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     async function fetchMySendedBlessings() {
-        console.log('chainId', chainId)
         if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
             try {
                 const blessings = await cbContract.getMySendedBlessings()
                 setBlessings(transBlesingsFromWalletBlessings(account, blessings))
-                console.log('blessings', blessings)
             } catch (err) {
                 console.log("Error: ", err)
             }
@@ -116,7 +114,7 @@ const BlessingSended = () => {
                                     return (
                                     <TableCell key={column.id} align={column.align}>
                                         {column.type === 'image' && !revoked ? 
-                                        <img width={80} height={80} alt='CryptoBlessing' src={value} />
+                                        <img width={80} height={80} alt='CryptoBlessing' src={'/images/blessings/items/' + value} />
                                         : 
                                         ''}
 

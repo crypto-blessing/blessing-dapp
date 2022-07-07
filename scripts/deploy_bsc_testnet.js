@@ -31,14 +31,14 @@ async function main() {
     // transfer the owner of CBNFT to the owner of CryptoBlessing.
     await cbNFT.transferOwnership(cryptoBlessing.address);
 
-    let addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png", "0x8b2A30e4870B85c87B72a165910F932C87aEd856", "gong xi fa cai#In every Chinese New Year, the greetings among Chinese", BigInt(0.1 * 10 ** 18), 1, 10);
-    await addBlessingTx.wait();
-
-    // addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/tuo.png", "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199", "脱，脱，脱!#The ultimate home for engineers", BigInt(1 * 10 ** 18), 3);
+    // let addBlessingTx = await cryptoBlessing.addBlessing("gongxifacai.gif", "0x8b2A30e4870B85c87B72a165910F932C87aEd856", "Lucky Tiger!#Hope everyone is lucky💰 lucky💰 lucky💰 in 2022!", BigInt(0.1 * 10 ** 18), 1, 10);
     // await addBlessingTx.wait();
 
-    // addBlessingTx = await cryptoBlessing.addBlessing("http://rdvru2kvi.hn-bkt.clouddn.com/notwar.png", "0x2546BcD3c84621e976D8185a91A922aE77ECEc30", "make love, not war!#We need to fill the world with love", BigInt(9.9 * 10 ** 18), 2);
-    // await addBlessingTx.wait();
+    // let addBlessingTx2 = await cryptoBlessing.addBlessing("soul.gif", "0xaF894D18cc4652C90dc024235975a43e8f737087", "Soal for you!#Bless your soul, my friend.", BigInt(0.1 * 10 ** 18), 1, 10);
+    // await addBlessingTx2.wait();
+
+    // let addBlessingTx3 = await cryptoBlessing.addBlessing("fortune.gif", "0xC868FdF4113C4FD16F0A734ce40952942E808374", "Give you fortune!#Fortune is the goddess of luck.", BigInt(0.1 * 10 ** 18), 1, 10);
+    // await addBlessingTx3.wait();
 
 }
 

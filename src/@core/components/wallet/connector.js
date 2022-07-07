@@ -13,8 +13,9 @@ export const getWeb3 = (chainId) => {
       return new Web3(new Web3.providers.WebsocketProvider(process.env.REACT_APP_BSC_MAINNET_WS));
     case 97:
 
-      // return new Web3(new Web3.providers.WebsocketProvider(process.env.REACT_APP_BSC_TESTNET_WS));
-      return new Web3(new Web3.providers.WebsocketProvider("wss://testnet.binance.vision/ws"));
+      return new Web3(new Web3.providers.WebsocketProvider(process.env.REACT_APP_BSC_TESTNET_WS));
+      
+      // return new Web3(new Web3.providers.WebsocketProvider("wss://testnet.binance.vision/ws"));
     case 1337:
       return new Web3(window.ethereum);
     default:

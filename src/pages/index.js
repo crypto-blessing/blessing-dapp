@@ -19,7 +19,6 @@ const Blessings = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     async function fetchBlessings() {
-        console.log('chainId', chainId)
         if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
@@ -27,7 +26,7 @@ const Blessings = () => {
                 setBlessings(await cbContract.getAllBlessings())
             } catch (err) {
                 setBlessings([{
-                    image: 'http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png',
+                    image: 'gongxifacai.gif',
                     description: 'gong xi fa cai#In every Chinese New Year, the greetings among Chinese',
                     price: BigInt(0.1 * 10 ** 18),
                     owner: '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097',
@@ -37,7 +36,7 @@ const Blessings = () => {
             
         } else {
             setBlessings([{
-                image: 'http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png',
+                image: 'gongxifacai.gif',
                 description: 'gong xi fa cai#In every Chinese New Year, the greetings among Chinese',
                 price: BigInt(0.1 * 10 ** 18),
                 owner: '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097',
