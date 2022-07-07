@@ -40,9 +40,13 @@ module.exports = {
       allowUnlimitedContractSize: true,
     },
     bsc_testnet: {
-      //url: "https://apis.ankr.com/4ba236862ab54a55b364dcd322cdb412/807cff1041c516e514318a326153c1f3/binance/full/test",
       url: process.env.REACT_APP_BSC_TESTNET_URL,
       chainId: 97,
+      accounts: [process.env.REACT_APP_BSC_TESTNET_OWNER_PRIVATEKEY]
+    },
+    bsc_mainnet: {
+      url: process.env.REACT_APP_BSC_MAINNET_URL,
+      chainId: 56,
       accounts: [process.env.REACT_APP_BSC_TESTNET_OWNER_PRIVATEKEY]
     },
   },

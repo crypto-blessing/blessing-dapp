@@ -29,13 +29,20 @@ const Blessings = () => {
                 setBlessings([{
                     image: 'http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png',
                     description: 'gong xi fa cai#In every Chinese New Year, the greetings among Chinese',
-                    price: BigInt(1 * 10 ** 18),
+                    price: BigInt(0.1 * 10 ** 18),
                     owner: '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097',
                 }])
                 console.log("Error: ", err)
             }
             
-        }    
+        } else {
+            setBlessings([{
+                image: 'http://rdvru2kvi.hn-bkt.clouddn.com/gongxifacai.png',
+                description: 'gong xi fa cai#In every Chinese New Year, the greetings among Chinese',
+                price: BigInt(0.1 * 10 ** 18),
+                owner: '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097',
+            }])
+        }
     }
 
     useEffect(() => {

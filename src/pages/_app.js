@@ -31,6 +31,7 @@ import '../../styles/globals.css'
 import { Web3ReactProvider } from '@web3-react/core'
 import Web3 from 'web3'
 
+
 const clientSideEmotionCache = createEmotionCache()
 
 // ** Pace Loader

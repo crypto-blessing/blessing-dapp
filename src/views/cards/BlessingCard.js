@@ -47,6 +47,8 @@ import BUSDContract from 'src/artifacts/contracts/TestBUSD.sol/BUSD.json'
 
 const Web3 = require('web3');
 
+import {getWeb3} from 'src/@core/components/wallet/connector'
+
 
 const style = {
   position: 'absolute',
@@ -160,8 +162,9 @@ const BlessingCard = (props) => {
     const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
     provider.getSigner().getAddress().then(async (address) => {
       try {
-          const busdAllownce = ethers.utils.formatEther(await busdContract.allowance(address, cryptoBlessingAdreess(chainId)))
-          setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce) * 10 ** 18))
+        const allowance = await busdContract.allowance(address, cryptoBlessingAdreess(chainId))
+        const busdAllownce = ethers.utils.formatEther(allowance)
+        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce).toFixed(2) * 1.5 * 10 ** 18))
       } catch (err) {
           console.log("Error: ", err)
       }
@@ -292,7 +295,7 @@ const BlessingCard = (props) => {
 
   useEffect(() => {
     if (chainId) {
-      const web3 = new Web3(window.ethereum)
+      const web3 = getWeb3(chainId)
       const busdContract = new web3.eth.Contract(BUSDContract.abi, BUSDContractAddress(chainId))
       busdContract.events.Approval({
         filter: {
@@ -300,7 +303,7 @@ const BlessingCard = (props) => {
           spender: cryptoBlessingAdreess(chainId),
         }
       }).on('data', event => {
-        console.log('event', event)
+        console.log('Approval event', event)
         const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
         setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - event.returnValues.value) * 10 ** 18))
         setLoading(false)
@@ -313,7 +316,7 @@ const BlessingCard = (props) => {
           sender: account,
         }
       }).on('data', event => {
-        console.log('event', event)
+        console.log('senderSendCompleted event', event)
         if (event.returnValues.sender == account) {
           setLoading(false)
         }

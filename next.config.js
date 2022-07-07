@@ -1,9 +1,15 @@
 const path = require('path')
+const webpack = require('webpack')
+
+const { parsed: myEnv } = require('dotenv').config({
+  path: __dirname + '/.env'
+})
 
 module.exports = {
   trailingSlash: true,
   reactStrictMode: false,
   experimental: {
+    styledComponents: true,
     esmExternals: false,
     jsconfigPaths: true // enables it for both jsconfig.json and tsconfig.json
   },
@@ -12,6 +18,7 @@ module.exports = {
       ...config.resolve.alias,
       apexcharts: path.resolve(__dirname, './node_modules/apexcharts-clevision')
     }
+    config.plugins.push(new webpack.EnvironmentPlugin(myEnv))
 
     return config
   }

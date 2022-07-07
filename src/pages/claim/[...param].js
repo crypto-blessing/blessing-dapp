@@ -53,6 +53,8 @@ import {encode} from 'src/@core/utils/cypher'
 
 const Web3 = require('web3');
 
+import {getWeb3} from 'src/@core/components/wallet/connector'
+
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
   [theme.breakpoints.up('sm')]: { width: '40rem' }
@@ -141,8 +143,6 @@ const ClaimPage = () => {
 
   const [revoking, setRevoking] = useState(false)
 
-  const [claimResult, setClaimResult] = useState({})
-
   const [alreadyClaimed, setAlreadyClaimed] = useState(false)
 
   const handleClaimSuccessClose = () => {
@@ -189,9 +189,10 @@ const ClaimPage = () => {
     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
 
     try {
-      await cbContract.revokeBlessing(
+      const revokeTx = await cbContract.revokeBlessing(
         blessingSended.blessingID
       )
+      await revokeTx.wait();
       setRevoking(false)
     } catch (e) {
       console.log(e)
@@ -220,14 +221,13 @@ const ClaimPage = () => {
       const MESSAGE = web3.utils.sha3('CryptoBlessing');
       const signature = await web3.eth.accounts.sign(MESSAGE, claimKey);
 
-      const claimResult = await cbContract.claimBlessing(
+      const claimTx = await cbContract.claimBlessing(
         sender, 
         blessingSended.blessingID, 
         toEthSignedMessageHash(web3, MESSAGE),
         signature.signature
       )
-      console.log('claimResult', claimResult.value.toString())
-      setClaimResult(claimResult)
+      await claimTx.wait();
       setClaiming(false)
       localStorage.setItem('my_claimed_' + blessingSended.blessingID, 1)
       setClaimSuccessOpen(true)
@@ -265,35 +265,36 @@ const ClaimPage = () => {
 
   useEffect(() => {
     if (chainId && sender && blessingID) {
-      const web3 = new Web3(window.ethereum)
+      
+      
+      const web3 = getWeb3(chainId)
+
       const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
-      console.log('event chainId', chainId)
-      console.log('event sender', sender)
-      console.log('event blessingID', blessingID)
       cbContract.events.claimerClaimComplete({
         filter: {
           sender: sender,
-          blessingID: blessingID,
         }
       }).on('data', event => {
-        console.log('event', event)
+        console.log('claimerClaimComplete event', event)
         if (event.returnValues.sender == sender && event.returnValues.blessingID == blessingID) {
           featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
         }
       })
+
       cbContract.events.senderRevokeComplete({
         filter: {
           sender: sender,
           blessingID: blessingID,
         }
       }).on('data', event => {
-        console.log('event', event)
+        console.log('senderRevokeComplete event', event)
         if (event.returnValues.sender == sender && event.returnValues.blessingID == blessingID) {
-          featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
+          blessingSended.revoked = true
+          setBlessingSended(blessingSended)
         }
       })
     }
-  }, [chainId, blessingID, sender, featchAllInfoOfBlessing])
+  }, [chainId, blessingID, sender, featchAllInfoOfBlessing, blessingSended])
 
   return (
     <Grid container spacing={6}>
@@ -408,9 +409,26 @@ const ClaimPage = () => {
                     <InfoIcon />
                   </IconButton>
                 </Tooltip>
-                <Button disabled={claimList.length > 0 || revoking} onClick={revokeBlessing} size='large' color='error' variant='outlined'>
-                  Revoke
-                </Button>
+
+                <Box sx={{ m: 1, position: 'relative' }}>
+                  <Button disabled={claimList.length > 0 || revoking} onClick={revokeBlessing} size='large' color='error' variant='outlined'>
+                    {revoking ? 'Waiting for revoke transaction...' : 'Revoke'}
+                  </Button>
+                  {revoking && (
+                    <CircularProgress
+                      color="secondary"
+                      size={24}
+                      sx={{
+                        color: green[500],
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        marginTop: '-12px',
+                        marginLeft: '-12px',
+                      }}
+                    />
+                  )}
+                </Box>
                 
                 <Button disabled={claimList.length > 0 && claimList.length == blessingSended.claimQuantity} onClick={copyClaimLink} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
                   Copy Claim Link
@@ -445,9 +463,9 @@ const ClaimPage = () => {
             <Stack direction="row" spacing={1}>
               <Box sx={{ m: 1, position: 'relative' }}>
                 <Button disabled={claiming || claimKey == '' || alreadyClaimed} onClick={claimBlessing} size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
-                  {loading ? 'Waiting for claim transaction...' : 'Claim Blessing'}
+                  {claiming ? 'Waiting for claim transaction...' : 'Claim Blessing'}
                 </Button>
-                {loading && (
+                {claiming && (
                   <CircularProgress
                     color="secondary"
                     size={24}
