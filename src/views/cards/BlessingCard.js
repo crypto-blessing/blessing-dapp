@@ -45,11 +45,6 @@ import { useWeb3React } from "@web3-react/core"
 import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
 import BUSDContract from 'src/artifacts/contracts/TestBUSD.sol/BUSD.json'
 
-const Web3 = require('web3');
-
-import {getWeb3} from 'src/@core/components/wallet/connector'
-
-
 const style = {
   position: 'absolute',
   top: '50%',
