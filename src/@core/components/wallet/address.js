@@ -3,9 +3,9 @@
 export const getProviderUrl = (chainId) => {
     switch (chainId) {
         case 56:
-            return process.env.REACT_APP_BSC_MAINNET_URL;
+            return 'https://apis.ankr.com/e6fc9c6cc295486dab5eb00d387e968b/807cff1041c516e514318a326153c1f3/binance/full/main';
         case 97:
-            return process.env.REACT_APP_BSC_TESTNET_URL;
+            return 'https://apis.ankr.com/4ba236862ab54a55b364dcd322cdb412/807cff1041c516e514318a326153c1f3/binance/full/test';
         case 1337:
             return 'http://localhost:8545';
     }
