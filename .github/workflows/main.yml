@@ -10,6 +10,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16
+      - run: SET NODE_ENV=development
       - run: npm install -g yarn
       - run: yarn install --frozen-lockfile
       - run: yarn build
