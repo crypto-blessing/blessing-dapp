@@ -114,13 +114,13 @@ const BlessingSended = () => {
                                     return (
                                     <TableCell key={column.id} align={column.align}>
                                         {column.type === 'image' && !revoked ? 
-                                        <img width={80} height={80} alt='CryptoBlessing' src={'/images/blessings/items/' + value} />
+                                        <img width={80} alt='CryptoBlessing' src={'/images/blessings/items/' + value} />
                                         : 
                                         ''}
 
                                         {column.type === 'image' && revoked ? 
                                         <Badge badgeContent='revoked' color="secondary">
-                                            <img width={80} height={80} alt='CryptoBlessing' src={value} />
+                                            <img width={80} alt='CryptoBlessing' src={value} />
                                         </Badge>
                                         : 
                                         ''}

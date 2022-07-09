@@ -1,3 +1,16 @@
+
+
+export const getProviderUrl = (chainId) => {
+    switch (chainId) {
+        case 56:
+            return process.env.REACT_APP_BSC_MAINNET_URL;
+        case 97:
+            return process.env.REACT_APP_BSC_TESTNET_URL;
+        case 1337:
+            return 'http://localhost:8545';
+    }
+}
+
 export const simpleShow = (address) => {
     if (address != undefined && address.length === 42) {
         return address.substring(0, 6) + '...' + address.substring(address.length - 4, address.length);
@@ -19,13 +32,13 @@ export const chainName = (chainId) => {
 export const cryptoBlessingAdreess = (chainId) => {
     switch (chainId) {
         case 56:
-            return 'BSC-Mainnet';
+            return '0xc0CE659216A0EE7B0a9c309BdE2FB42376aD215a';
         case 97:
             return '0x79f6D9076D24EeD88D3711eaBF8Ed67C1F82dAF7';
         case 1337:
             return '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0';
         default:
-            return 'BSC-Mainnet';
+            return '0xc0CE659216A0EE7B0a9c309BdE2FB42376aD215a';
     }
 
 }
@@ -46,25 +59,25 @@ export const BUSDContractAddress = (chainId) => {
 export const CBTContractAddress = (chainId) => {
     switch (chainId) {
         case 56:
-            return 'BSC-Mainnet';
+            return '0x218B53FBCc4b128e2FF289d78079174d7E35CF4C';
         case 97:
             return '0xd714e21932BAE2aF5F88793924DCdA76B072fBCC';
         case 1337:
             return '0x610178dA211FEF7D417bC0e6FeD39F05609AD788';
         default:
-            return 'BSC-Mainnet';
+            return '0x218B53FBCc4b128e2FF289d78079174d7E35CF4C';
     }
 }
 
 export const CBNFTContractAddress = (chainId) => {
     switch (chainId) {
         case 56:
-            return 'BSC-Mainnet';
+            return '0x01ee790155677AAAE3060a09e32491d4C716f908';
         case 97:
             return '0xcf1e0102e08517207D3bb91EcB0a1a073EdFD410';
         case 1337:
             return '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e';
         default:
-            return 'BSC-Mainnet';
+            return '0x01ee790155677AAAE3060a09e32491d4C716f908';
     }
 }

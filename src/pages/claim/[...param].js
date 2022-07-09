@@ -45,15 +45,13 @@ import { ethers, utils } from 'ethers'
 import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
 import { useWeb3React } from "@web3-react/core"
 import { getBlessingTitle, getBlessingDesc, transClaimListFromWalletClaims } from 'src/@core/utils/blessing'
-import {simpleShow, cryptoBlessingAdreess} from 'src/@core/components/wallet/address'
+import {getProviderUrl, simpleShow, cryptoBlessingAdreess} from 'src/@core/components/wallet/address'
 import {toLocaleDateFromBigInt} from 'src/@core/utils/date'
 
 
 import {encode} from 'src/@core/utils/cypher'
 
 const Web3 = require('web3');
-
-import {getWeb3} from 'src/@core/components/wallet/connector'
 
 // ** Styled Components
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -199,7 +197,7 @@ const ClaimPage = () => {
   const copyClaimLink = () => {
     const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingSended.blessingID)
 
-    navigator.clipboard.writeText(`[CryptoBlessing] Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${encode(sender)}/${encode(blessingSended.blessingID)}/${encode(privateKey)} which sended by ${simpleShow(sender)}`)
+    navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(blessing.description)} | ${getBlessingDesc(blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim/${encode(sender)}/${encode(blessingSended.blessingID)}/${encode(privateKey)}`)
     handleAlertOpen('Claim Link Copied!')
   }
 
@@ -258,30 +256,19 @@ const ClaimPage = () => {
 
   useEffect(() => {
     if (chainId) {
-      const web3 = getWeb3(chainId)
-      const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
 
-      cbContract.events.claimerClaimComplete({
-        filter: {
-          sender: sender,
-          blessingID: blessingID,
-        }
-      }).on('data', event => {
-        console.log('claimerClaimComplete event', event)
-        if (event.returnValues.sender == sender && event.returnValues.blessingID == blessingID) {
+      const provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId))
+      const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider)
+      cbContract.on('claimerClaimComplete', (ret_sender, ret_blessingID) => {
+        console.log('claimerClaimComplete', ret_sender, ret_blessingID)
+        if (ret_sender == sender && ret_blessingID == blessingID) {
           featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
         }
       })
 
-      cbContract.events.senderRevokeComplete({
-        filter: {
-          sender: sender,
-          blessingID: blessingID,
-        }
-      }).on('data', event => {
-        console.log('senderRevokeComplete event', event)
-
-        if (event.returnValues.sender == sender && event.returnValues.blessingID == blessingID) {
+      cbContract.on('senderRevokeComplete', (ret_sender, ret_blessingID) => {
+        console.log('senderRevokeComplete', ret_sender, ret_blessingID)
+        if (ret_sender == sender && ret_blessingID == blessingID) {
           blessingSended.revoked = true
           setBlessingSended(blessingSended)
         }
@@ -308,9 +295,10 @@ const ClaimPage = () => {
             }}
           >
             <Avatar
-              sx={{ width: 150, height: 150, marginBottom: 2.25, color: 'common.white', backgroundColor: 'primary.main' }}
+              sx={{ width: 150, height: 150, marginBottom: 2.25, color: 'common.white', backgroundColor: 'primary.main',
+              '-webkit-box-shadow': '0px 0px 20px 0px rgba(146,90,248,0.75)', filter: 'drop-shadow(0px 0px 20px 0px rgba(146,90,248,0.75))', margin: '15px' }}
             >
-              <img width={150} height={150} alt='CryptoBlessing' src={'/images/blessings/items/' + blessing.image} />
+              <img width={150} alt='CryptoBlessing' src={'/images/blessings/items/' + blessing.image} />
             </Avatar>
             <Typography variant='h6' sx={{ marginBottom: 2.75 }}>
             {getBlessingTitle(blessing.description)}

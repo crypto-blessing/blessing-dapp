@@ -36,7 +36,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 import { getBlessingTitle, getBlessingDesc } from 'src/@core/utils/blessing'
 
-import {simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
+import {getProviderUrl, simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
 import {encode} from 'src/@core/utils/cypher'
 
 
@@ -161,7 +161,7 @@ const BlessingCard = (props) => {
       try {
         const allowance = await busdContract.allowance(address, cryptoBlessingAdreess(chainId))
         const busdAllownce = ethers.utils.formatEther(allowance)
-        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce).toFixed(2) * 2 * 10 ** 18))
+        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce).toFixed(2) * 10 ** 18))
       } catch (err) {
           console.log("Error: ", err)
       }
@@ -251,7 +251,7 @@ const BlessingCard = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getSigner().getAddress().then(async (address) => {
       const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
-      navigator.clipboard.writeText(`[CryptoBlessing] Claim your BUSD & NFT here: https://cryptoblessing.app/claim/${encode(address)}/${encode(blessingKeypairAddress)}/${encode(privateKey)} which sended by ${simpleShow(address)}`)
+      navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(props.blessing.description)} | ${getBlessingDesc(props.blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim/${encode(address)}/${encode(blessingKeypairAddress)}/${encode(privateKey)}`)
     })
   }
 
@@ -291,42 +291,23 @@ const BlessingCard = (props) => {
 
   useEffect(() => {
     if (chainId) {
-      const web3 = getWeb3(chainId)
-      
-      const busdContract = new web3.eth.Contract(BUSDContract.abi, BUSDContractAddress(chainId))
-      busdContract.events.Approval({
-        filter: {
-          owner: account,
-          spender: cryptoBlessingAdreess(chainId),
-        }
-      }).on('data', event => {
-        console.log('Approval event', event)
-        const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
-        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - event.returnValues.value) * 10 ** 18))
-        setLoading(false)
-      })
-
-      // sended event
-      const cbContract = new web3.eth.Contract(CryptoBlessing.abi, cryptoBlessingAdreess(chainId))
-
-      cbContract.events.senderSendCompleted({
-        filter: {
-          sender: account,
-        }
-      }).on('data', event => {
-        console.log('senderSendCompleted event', event)
-        if (event.returnValues.sender == account) {
+      const provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId))
+      const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider)
+      busdContract.on('Approval', (owner, spender, value) => {
+        if (owner === account && spender === cryptoBlessingAdreess(chainId)) {
+          const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
+          setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - ethers.utils.formatEther(value)) * 10 ** 18))
           setLoading(false)
         }
       })
 
-      cbContract.events.senderRevokeComplete({
-        filter: {
-          sender: account
+      const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider)
+      cbContract.on('senderSendCompleted', (sender, ret_blessingID) => {
+        if (account == sender) {
+          setLoading(false)
         }
-      }).on('data', event => {
-        console.log('senderRevokeComplete event', event)
       })
+
     }
   }, [chainId, account, claimQuantity, props.blessing.price, tokenAmount])
 
@@ -381,7 +362,7 @@ const BlessingCard = (props) => {
             <Grid container spacing={6}>
               <StyledGrid item md={5} xs={12}>
                 <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img width={137} height={137} alt='CryptoBlessing' src={'/images/blessings/items/' + props.blessing.image} />
+                  <img width={137} alt='CryptoBlessing' src={'/images/blessings/items/' + props.blessing.image} />
                 </CardContent>
               </StyledGrid>
               <Grid
