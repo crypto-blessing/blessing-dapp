@@ -173,6 +173,7 @@ const ClaimPage = () => {
         setLoading(false);
       } catch (err) {
         console.log("Error: ", err)
+
         window.location.replace("/pages/404")
       }
     }
@@ -346,7 +347,7 @@ const ClaimPage = () => {
                       <StyledTableCell>{row.time}</StyledTableCell>
                       <StyledTableCell align='right'>
                         <Stack direction="row" spacing={1}>
-                          <Chip variant="outlined" color="warning" label={row.amount} icon={<BUSD_ICON />} />
+                          <Chip variant="outlined" color="warning" label={parseFloat(row.amount).toFixed(2)} icon={<BUSD_ICON />} />
                           <Chip
                             avatar={<Avatar alt="CryptoBlessing" src={'/images/blessings/items/' + blessing.image} />}
                             label="1"

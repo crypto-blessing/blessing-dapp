@@ -58,11 +58,11 @@ export const transClaimBlesingsFromWalletBlessings = (blessings) => {
 
 export const transClaimListFromWalletClaims = (claims) => {
     let newClaims = []
-    let claimedAmount = BigInt(0)
+    let claimedAmount = 0
     let luckyClaimer = {}
     let maxClaimAmount = BigInt(0)
     claims.forEach(claim => {
-        claimedAmount += claim.distributedAmount
+        claimedAmount += parseFloat(ethers.utils.formatEther(claim.distributedAmount))
         newClaims.push({
             claimer: simpleShow(claim.claimer),
             time: toLocaleDateFromBigInt(claim.claimTimestamp.toString()),
@@ -77,10 +77,11 @@ export const transClaimListFromWalletClaims = (claims) => {
             }
         }
     })
+    console.log('claimedAmount', claimedAmount)
 
     return {
         "claims": newClaims.reverse(),
-        "claimedAmount": ethers.utils.formatEther(claimedAmount),
+        "claimedAmount": claimedAmount.toFixed(2),
         "luckyClaimer": luckyClaimer
     }
 }
