@@ -20,7 +20,7 @@ jobs:
         with:
           username: 'root'
           server: ${{ secrets.SERVER_IP }}
-          passowrd: ${{ secrets.SERVER_PASS }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           local_path: './build/*'
           remote_path: '/var/www/blessing-dapp'
           sftpArgs: '-o ConnectTimeout=5'
