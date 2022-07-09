@@ -131,6 +131,7 @@ const BlessingCard = (props) => {
     let payCaption = '', claimCaption = '';
     if (tokenAmount > 0 && claimQuantity > 0) {
       let totalPay = (claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount)
+      refreshBUSDApprove(totalPay)
       payCaption = `You will pay ${totalPay} BUSD. `
     } else {
       payCaption = ''
@@ -147,16 +148,18 @@ const BlessingCard = (props) => {
       }
     }
     setBlessingCaption(payCaption + claimCaption)
+  }
 
-    // need approve BUSD amount
-    const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
+  const refreshBUSDApprove = (totalPay) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
     provider.getSigner().getAddress().then(async (address) => {
       try {
         const allowance = await busdContract.allowance(address, cryptoBlessingAdreess(chainId))
         const busdAllownce = ethers.utils.formatEther(allowance)
-        setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - busdAllownce).toFixed(2) * 10 ** 18))
+        console.log('totalBUSDArppoveAmount', totalPay)
+        console.log('busdAllownce', busdAllownce)
+        setNeedApproveBUSDAmount(BigInt((totalPay - busdAllownce) * 10 ** 18))
       } catch (err) {
           console.log("Error: ", err)
       }
@@ -196,8 +199,7 @@ const BlessingCard = (props) => {
     try {
       const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
       await tx.wait()
-      const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
-      setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - ethers.utils.formatEther(value)) * 10 ** 18))
+      refreshBUSDApprove((claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount))
       setApproving(false)
       setLoading(true)
     } catch (e) {
