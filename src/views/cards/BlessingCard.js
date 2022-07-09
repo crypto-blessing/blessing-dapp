@@ -246,7 +246,7 @@ const BlessingCard = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getSigner().getAddress().then(async (address) => {
       const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
-      navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(props.blessing.description)} | ${getBlessingDesc(props.blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim/${encode(address)}/${encode(blessingKeypairAddress)}/${encode(privateKey)}`)
+      navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(props.blessing.description)} | ${getBlessingDesc(props.blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(address)}&blessing=${encode(blessingKeypairAddress)}&key=${encode(privateKey)}`)
     })
   }
 

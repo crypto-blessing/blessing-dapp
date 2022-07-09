@@ -120,7 +120,7 @@ const BlessingSended = () => {
 
                                         {column.type === 'image' && revoked ? 
                                         <Badge badgeContent='revoked' color="secondary">
-                                            <img width={80} alt='CryptoBlessing' src={value} />
+                                            <img width={80} alt='CryptoBlessing' src={'/images/blessings/items/' + value} />
                                         </Badge>
                                         : 
                                         ''}

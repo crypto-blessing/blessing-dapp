@@ -110,17 +110,15 @@ const ClaimPage = () => {
 
   // ** Hook
   useEffect (() => {
-    let params = router.query
-    if (params.param?.length === 2 || params.param?.length === 3) {
-      setSender(decode(params.param[0]))
-      setBlessingID(decode(params.param[1]))
-      if (params.param?.length === 3) {
-        setClaimKey(decode(params.param[2]))
+    const {sender, blessing, key} = router.query
+      setSender(decode(sender))
+      setBlessingID(decode(blessing))
+      if (key) {
+        setClaimKey(decode(key))
       }
-      if (localStorage.getItem('my_claimed_' + decode(params.param[1])) === '1' || localStorage.getItem('my_blessing_claim_key_' + decode(params.param[1])) != undefined) {
+      if (localStorage.getItem('my_claimed_' + decode(blessing)) === '1' || localStorage.getItem('my_blessing_claim_key_' + decode(blessing)) != undefined) {
         setAlreadyClaimed(true)
       }
-    }
    
   }, [router.query])
   
@@ -197,7 +195,7 @@ const ClaimPage = () => {
   const copyClaimLink = () => {
     const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingSended.blessingID)
 
-    navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(blessing.description)} | ${getBlessingDesc(blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim/${encode(sender)}/${encode(blessingSended.blessingID)}/${encode(privateKey)}`)
+    navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(blessing.description)} | ${getBlessingDesc(blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(sender)}&blessing=${encode(blessingSended.blessingID)}&key=${encode(privateKey)}`)
     handleAlertOpen('Claim Link Copied!')
   }
 
