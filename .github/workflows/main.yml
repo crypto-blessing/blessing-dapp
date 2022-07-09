@@ -16,10 +16,11 @@ jobs:
       - run: yarn build
 
       - name: deploy file to server
-        uses: wlixcc/SFTP-Deploy-Action@v1.0
-        with:  
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
           username: 'root'
           server: '${{ secrets.SERVER_IP }}'
-          passowrd: ${{ secrets.SERVER_PAAS }}
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           local_path: './build/*'
           remote_path: '/var/www/blessing-dapp'
+          sftpArgs: '-o ConnectTimeout=5'
