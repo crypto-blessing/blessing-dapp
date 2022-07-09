@@ -23,6 +23,7 @@ import Stack from '@mui/material/Stack';
 import Modal from '@mui/material/Modal';
 import CardMedia from '@mui/material/CardMedia'
 import CircularProgress from '@mui/material/CircularProgress';
+import Badge from '@mui/material/Badge';
 
 import { green } from '@mui/material/colors';
 
@@ -126,6 +127,8 @@ const ClaimPage = () => {
   const [blessing, setBlessing] = useState({})
   const [blessingSended, setBlessingSended] = useState({})
   const [claimList, setClaimList] = useState([])
+  const [claimedAmount, setClaimedAmount] = useState(0)
+  const [luckyClaimer, setLuckyClaimer] = useState({})
 
   const [alertMsg, setAlertMsg] = useState('');
   const [alertOpen, setAlertOpen] = useState(false);
@@ -163,7 +166,10 @@ const ClaimPage = () => {
         const result = await cbContract.getAllInfoOfBlessing(sender, blessingID)
         setBlessing(result[0])
         setBlessingSended(result[1])
-        setClaimList(transClaimListFromWalletClaims(result[2]))
+        const claimResp = transClaimListFromWalletClaims(result[2])
+        setClaimList(claimResp.claims)
+        setClaimedAmount(claimResp.claimedAmount)
+        setLuckyClaimer(claimResp.luckyClaimer)
         setLoading(false);
       } catch (err) {
         console.log("Error: ", err)
@@ -260,6 +266,7 @@ const ClaimPage = () => {
       cbContract.on('claimerClaimComplete', (ret_sender, ret_blessingID) => {
         console.log('claimerClaimComplete', ret_sender, ret_blessingID)
         if (ret_sender == sender && ret_blessingID == blessingID) {
+          console.log('claimerClaimComplete', ret_sender, ret_blessingID)
           featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
         }
       })
@@ -267,6 +274,7 @@ const ClaimPage = () => {
       cbContract.on('senderRevokeComplete', (ret_sender, ret_blessingID) => {
         console.log('senderRevokeComplete', ret_sender, ret_blessingID)
         if (ret_sender == sender && ret_blessingID == blessingID) {
+          console.log('senderRevokeComplete', ret_sender, ret_blessingID)
           blessingSended.revoked = true
           setBlessingSended(blessingSended)
         }
@@ -305,7 +313,7 @@ const ClaimPage = () => {
             {getBlessingDesc(blessing.description)}
             </Typography>
             <Stack direction="row" spacing={1}>
-              <Chip variant="outlined" color="warning" label={(blessingSended && blessingSended.tokenAmount ? ethers.utils.formatEther(blessingSended.tokenAmount) : 0) + ' BUSD'} icon={<BUSD_ICON />} />
+              <Chip variant="outlined" color="warning" label={claimedAmount + '/' + (blessingSended && blessingSended.tokenAmount ? ethers.utils.formatEther(blessingSended.tokenAmount) : 0) + ' BUSD'} icon={<BUSD_ICON />} />
               <Chip variant="outlined" color="primary" label={claimList.length + '/' + (blessingSended?.claimQuantity?.toString()) + ' Blessings'} icon={<AccountCircleIcon />} />
             </Stack>
           </CardContent>
@@ -326,7 +334,14 @@ const ClaimPage = () => {
                   {claimList.map(row => (
                     <StyledTableRow key={row.claimer}>
                       <StyledTableCell component='th' scope='row'>
-                        {row.claimer}
+                        {row.claimer === luckyClaimer.claimer ?
+                        <Badge badgeContent='lucky' color="primary">
+                          {row.claimer}
+                        </Badge>
+                        :
+                        <Typography>{row.claimer}</Typography>
+                        }
+                        
                       </StyledTableCell>
                       <StyledTableCell>{row.time}</StyledTableCell>
                       <StyledTableCell align='right'>

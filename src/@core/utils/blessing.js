@@ -58,14 +58,29 @@ export const transClaimBlesingsFromWalletBlessings = (blessings) => {
 
 export const transClaimListFromWalletClaims = (claims) => {
     let newClaims = []
+    let claimedAmount = BigInt(0)
+    let luckyClaimer = {}
+    let maxClaimAmount = BigInt(0)
     claims.forEach(claim => {
+        claimedAmount += claim.distributedAmount
         newClaims.push({
             claimer: simpleShow(claim.claimer),
             time: toLocaleDateFromBigInt(claim.claimTimestamp.toString()),
             amount: ethers.utils.formatEther(claim.distributedAmount),
             CBTokenAwardToSenderAmount: claim.CBTokenAwardToSenderAmount.toString(),
         })
+        if (claim.distributedAmount > maxClaimAmount) {
+            maxClaimAmount = claim.distributedAmount
+            luckyClaimer = {
+                claimer: simpleShow(claim.claimer),
+                amount: ethers.utils.formatEther(claim.distributedAmount),
+            }
+        }
     })
 
-    return newClaims.reverse()
+    return {
+        "claims": newClaims.reverse(),
+        "claimedAmount": ethers.utils.formatEther(claimedAmount),
+        "luckyClaimer": luckyClaimer
+    }
 }

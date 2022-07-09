@@ -196,6 +196,8 @@ const BlessingCard = (props) => {
     try {
       const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
       await tx.wait()
+      const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
+      setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - ethers.utils.formatEther(value)) * 10 ** 18))
       setApproving(false)
       setLoading(true)
     } catch (e) {
@@ -233,7 +235,7 @@ const BlessingCard = (props) => {
       setOpen(false)
       setSendSuccessOpen(true)
       fetchBUSDAmount()
-      setLoading(true);
+      setLoading(true)
     } catch (e) {
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
       setAlertOpen(true);
@@ -284,27 +286,32 @@ const BlessingCard = (props) => {
   }, [chainId])
 
 
-  useEffect(() => {
-    if (chainId) {
-      const provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId))
-      const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider)
-      busdContract.on('Approval', (owner, spender, value) => {
-        if (owner === account && spender === cryptoBlessingAdreess(chainId)) {
-          const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
-          setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - ethers.utils.formatEther(value)) * 10 ** 18))
-          setLoading(false)
-        }
-      })
+  // useEffect(() => {
+  //   if (chainId) {
+  //     const provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId))
+  //     const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider)
+  //     busdContract.on('Approval', (owner, spender, value) => {
+  //       if (owner === account && spender === cryptoBlessingAdreess(chainId)) {
+  //         console.log('Approved')
+  //         const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
+  //         setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - ethers.utils.formatEther(value)) * 10 ** 18))
+  //         setLoading(false)
+  //       }
+  //     })
 
-      const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider)
-      cbContract.on('senderSendCompleted', (sender, ret_blessingID) => {
-        if (account == sender) {
-          setLoading(false)
-        }
-      })
+  //     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider)
+  //     cbContract.on('senderSendCompleted', (sender, ret_blessingID) => {
+  //       console.log('senderSendCompleted', sender, ret_blessingID)
+  //       if (account == sender) {
+  //         setSending(false)
+  //         setOpen(false)
+  //         setSendSuccessOpen(true)
+  //         setLoading(true)
+  //       }
+  //     })
 
-    }
-  }, [chainId, account, claimQuantity, props.blessing.price, tokenAmount])
+  //   }
+  // }, [chainId, account, claimQuantity, props.blessing.price, tokenAmount])
 
   return (
     <Card>
