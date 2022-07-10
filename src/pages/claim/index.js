@@ -342,7 +342,7 @@ const ClaimPage = () => {
                           {row.claimer}
                         </Badge>
                         :
-                        <Typography>{row.claimer}</Typography>
+                        <Typography variant="body2" >{row.claimer}</Typography>
                         }
                         
                       </StyledTableCell>
