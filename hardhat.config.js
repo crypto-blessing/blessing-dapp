@@ -39,15 +39,5 @@ module.exports = {
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
     },
-    bsc_testnet: {
-      url: process.env.REACT_APP_BSC_TESTNET_URL,
-      chainId: 97,
-      accounts: [process.env.REACT_APP_BSC_OWNER_PRIVATEKEY]
-    },
-    bsc_mainnet: {
-      url: process.env.REACT_APP_BSC_MAINNET_URL,
-      chainId: 56,
-      accounts: [process.env.REACT_APP_BSC_OWNER_PRIVATEKEY]
-    },
   },
 };

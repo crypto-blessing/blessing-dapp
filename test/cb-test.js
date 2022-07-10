@@ -218,6 +218,7 @@ describe("CryptoBlessing", function () {
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
             signature.signature,
+            claimer.address
         );
         await claimBlessingTx.wait();
         let claimerBUSD = await BUSD.balanceOf(claimer.address);
@@ -235,6 +236,85 @@ describe("CryptoBlessing", function () {
         cbNFTCount = await cbNFT.balanceOf(claimer.address)
         expect(cbNFTCount).to.equal(1);
 
+    });
+
+
+    it("Should not claim the blessing(avarage)?", async function () {
+
+        const [owner, sender, blessingOwner, claimer1, claimer2, claimer3] = await ethers.getSigners();
+        const blessingKeypair = ethers.Wallet.createRandom();
+        const blessingKeypairFake = ethers.Wallet.createRandom();
+
+        // const blessingKeypair = web3.eth.accounts.create();
+        // deploy contracts
+        await deployCBToken();
+        await deployCBNFT();
+        await deployBUSD();
+        await deployCryptoBlessing();
+
+        let ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(BigInt(79 * 100000000));
+
+        // transfer 7.9 billion CB token to the contract
+        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
+        await transferCBTx.wait();
+        let  blessingCB = await cbToken.balanceOf(cryptoBlessing.address);
+        expect(blessingCB).to.equal(BigInt(79 * 100000000));
+        ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(BigInt(0));
+
+        // transfer the owner of CBNFT to the owner of CryptoBlessing.
+        await cbNFT.transferOwnership(cryptoBlessing.address);
+
+        const sendBUSDAmount = BigInt(200 * 10 ** 18);
+        const blessingPrice = BigInt(1 * 10 ** 18);
+        const claimQuantity = 10;
+
+        const transferBUSDTx = await BUSD.transfer(sender.address, BigInt(400 * 10 ** 18));
+        await transferBUSDTx.wait();
+
+        // 0 allowance
+        const approveBUSDTx = await BUSD.connect(sender).approve(cryptoBlessing.address, BigInt(210 * 10 ** 18));
+        await approveBUSDTx.wait();
+
+        // 1 add blessing to the pool
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
+        await addBlessingTx.wait();
+
+        // 2 send blessing
+        const sendBlessingTx = await cryptoBlessing.connect(sender).sendBlessing(
+            "blessing image", blessingKeypair.address, 
+            sendBUSDAmount, 
+            claimQuantity,
+            0 
+        );
+        await sendBlessingTx.wait();
+
+        const MESSAGE = web3.utils.sha3('CryptoBlessing');
+        const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair.privateKey);
+
+        // 3 fake  claim the blessing
+        const claimBlessingTx = await cryptoBlessing.connect(claimer1).claimBlessing(
+            sender.address,
+            blessingKeypair.address,
+            toEthSignedMessageHash(MESSAGE),
+            signature.signature,
+            claimer1.address
+        );
+
+        const claimBlessing2Tx = await cryptoBlessing.connect(claimer2).claimBlessing(
+            sender.address,
+            blessingKeypair.address,
+            toEthSignedMessageHash(MESSAGE),
+            signature.signature,
+            claimer2.address
+        );
+        await claimBlessingTx.wait();
+        await claimBlessing2Tx.wait();
+        let claimerBUSD = await BUSD.balanceOf(claimer1.address);
+        let claimer2BUSD = await BUSD.balanceOf(claimer2.address);
+        expect(claimerBUSD).to.equal(BigInt(200 * 10 ** 18 / 10 * 99 / 100));
+        expect(claimer2BUSD).to.equal(BigInt(200 * 10 ** 18 / 10 * 99 / 100));
     });
 
     function toEthSignedMessageHash (messageHex) {
@@ -357,6 +437,7 @@ describe("CryptoBlessing", function () {
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
             signature.signature,
+            claimer1.address
         );
         await claim1BlessingTx.wait();
         let claimer1BUSD = await BUSD.balanceOf(claimer1.address);
@@ -368,6 +449,7 @@ describe("CryptoBlessing", function () {
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
             signature.signature,
+            claimer2.address
         );
         await claim2BlessingTx.wait();
         let claimer2BUSD = await BUSD.balanceOf(claimer2.address);
@@ -378,6 +460,7 @@ describe("CryptoBlessing", function () {
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
             signature.signature,
+            claimer3.address
         );
         await claim3BlessingTx.wait();
         let claimer3BUSD = await BUSD.balanceOf(claimer3.address);
@@ -388,6 +471,7 @@ describe("CryptoBlessing", function () {
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
             signature.signature,
+            claimer4.address
         );
         await claim4BlessingTx.wait();
         let claimer4BUSD = await BUSD.balanceOf(claimer4.address);
@@ -398,6 +482,7 @@ describe("CryptoBlessing", function () {
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
             signature.signature,
+            claimer5.address
         );
         await claim5BlessingTx.wait();
         let claimer5BUSD = await BUSD.balanceOf(claimer5.address);

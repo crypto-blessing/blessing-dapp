@@ -9,16 +9,13 @@ const hre = require("hardhat");
 async function main() {
 
     const CryptoBlessing = await hre.ethers.getContractFactory("CryptoBlessing");
-    const cryptoBlessing = await CryptoBlessing.attach("0xc0CE659216A0EE7B0a9c309BdE2FB42376aD215a");
+    const cryptoBlessing = await CryptoBlessing.attach("0x5C8e40ce70273bBFd8a619a0347f15BA33c3E58F");
 
     let addBlessingTx = await cryptoBlessing.addBlessing("gongxifacai.gif", "0x8b2A30e4870B85c87B72a165910F932C87aEd856", "Lucky Tiger!#Hope everyone is lucky💰 lucky💰 lucky💰 in 2022!", BigInt(0.1 * 10 ** 18), 1, 10);
-    await addBlessingTx.wait();
 
     let addBlessingTx2 = await cryptoBlessing.addBlessing("soul.gif", "0xaF894D18cc4652C90dc024235975a43e8f737087", "Soal for you!#Bless your soul, my friend.", BigInt(0.1 * 10 ** 18), 1, 10);
-    await addBlessingTx2.wait();
 
     let addBlessingTx3 = await cryptoBlessing.addBlessing("fortune.gif", "0xC868FdF4113C4FD16F0A734ce40952942E808374", "Give you fortune!#Fortune is the goddess of luck.", BigInt(0.1 * 10 ** 18), 1, 10);
-    await addBlessingTx3.wait();
 
 }
 

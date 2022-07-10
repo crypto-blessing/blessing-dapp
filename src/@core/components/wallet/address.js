@@ -32,9 +32,9 @@ export const chainName = (chainId) => {
 export const cryptoBlessingAdreess = (chainId) => {
     switch (chainId) {
         case 56:
-            return '0xc0CE659216A0EE7B0a9c309BdE2FB42376aD215a';
+            return '0x5C8e40ce70273bBFd8a619a0347f15BA33c3E58F';
         case 97:
-            return '0x79f6D9076D24EeD88D3711eaBF8Ed67C1F82dAF7';
+            return '0x38bbd40b41E95F6Dc7B27F3A727C8A1455fAa623';
         case 1337:
             return '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0';
         default:

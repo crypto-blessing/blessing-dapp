@@ -408,7 +408,7 @@ const BlessingCard = (props) => {
                     <TextField
                       onChange={handleTokenAmountChange}
                       fullWidth
-                      label={'How much BUSD do you want to send?(wallet: ' + ethers.utils.formatEther(busdAmount) + ' BUSD)'}
+                      label={'How much BUSD do you want to send?(wallet: ' + parseFloat(ethers.utils.formatEther(busdAmount)).toFixed(2) + ' BUSD)'}
                       placeholder='10'
                       type='number'
                       InputProps={{

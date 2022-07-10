@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "hardhat/console.sol";
 
 interface ICryptoBlessingNFT {
@@ -14,7 +16,7 @@ interface ICryptoBlessingNFT {
     function transferOwnership(address newOwner) external;
 }
 
-contract CryptoBlessing is Ownable, Pausable {
+contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
 
     using SafeMath for uint256;
 
@@ -240,11 +242,14 @@ contract CryptoBlessing is Ownable, Pausable {
         address sender,
         address blessingID,
         bytes32 hash,
-        bytes memory signature
-    ) payable public whenNotPaused returns (ClaimerBlessing memory){
+        bytes memory signature,
+        address fuckOff
+    ) payable public whenNotPaused nonReentrant returns (ClaimerBlessing memory){
         console.log("start to claim blessing! sender:%s, blessingID:%s", sender, blessingID);
+        require(fuckOff == msg.sender, "fuckOff!!!");
         require(_verify(hash, signature, blessingID), "Invalid signiture!");
         console.log("signature is valid!");
+        require(!Address.isContract(msg.sender), "You can not claim blessing from contract!");
         SenderBlessing[] memory senderBlessings = senderBlessingMapping[sender];
         require(senderBlessings.length > 0, "There is no blessing found on this sender!");
         SenderBlessing memory choosedSenderBlessing;

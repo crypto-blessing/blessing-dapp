@@ -223,9 +223,11 @@ const ClaimPage = () => {
         sender, 
         blessingSended.blessingID, 
         toEthSignedMessageHash(web3, MESSAGE),
-        signature.signature
+        signature.signature,
+        account
       )
       await claimTx.wait();
+      featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
       setClaiming(false)
       localStorage.setItem('my_claimed_' + blessingSended.blessingID, 1)
       setClaimSuccessOpen(true)
