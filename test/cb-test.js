@@ -71,6 +71,51 @@ describe("CryptoBlessing", function () {
         expect(allBlessings[0].deleted).to.equal(0);
     });
 
+    it("Should batch add blessings", async function () {
+        const [owner, anotherAddress] = await ethers.getSigners();
+
+        // deploy contracts
+        await deployCBToken();
+        await deployCBNFT();
+        await deployBUSD();
+        await deployCryptoBlessing();
+        
+        let allBlessings = await cryptoBlessing.getAllBlessings()
+        expect(allBlessings.length).to.equal(0);
+
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, "gong xi fa cai", BigInt(1 * 10 ** 18), 1, 10);
+        await addBlessingTx.wait();
+
+        // batch add blessing to the pool
+        const batchAddBlessingTx = await cryptoBlessing.batchAddBlessing([{
+            image: "blessing image", 
+            description: "gong xi fa cai", 
+            price: BigInt(9 * 10 ** 18), 
+            owner: owner.address, 
+            blessingType: 0,
+            timestamp: 0, 
+            deleted: 1, 
+            taxRate: 10
+        }, 
+        {
+            image: "batch", 
+            description: "gong xi fa cai", 
+            price: BigInt(9 * 10 ** 18), 
+            owner: owner.address, 
+            blessingType: 0,
+            timestamp: 0, 
+            deleted: 1, 
+            taxRate: 10
+        }, 
+        ]);
+        await batchAddBlessingTx.wait();
+        allBlessings = await cryptoBlessing.getAllBlessings()
+        expect(allBlessings.length).to.equal(3);
+        expect(allBlessings[1].price).to.equal(BigInt(9 * 10 ** 18));
+        expect(allBlessings[2].image).to.equal("batch");
+    });
+
+
 
 
     it("Should not append or remove one blessing from the blessing pool?", async function () {
@@ -101,6 +146,7 @@ describe("CryptoBlessing", function () {
         }
         expect(err).to.equal("VM Exception while processing transaction: reverted with reason string 'Ownable: caller is not the owner'");
     });
+
 
     it("Should send a blessing?", async function () {
 

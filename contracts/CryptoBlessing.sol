@@ -160,6 +160,15 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         ));
     }
 
+    function batchAddBlessing(
+        Blessing[] memory blessings
+    ) public onlyOwner {
+        console.log("start to add blessing to the pool!");
+        for (uint256 i = 0; i < blessings.length; i ++) {
+            blessingList.push(Blessing(blessings[i].image, blessings[i].description, blessings[i].price, blessings[i].owner, blessings[i].blessingType, block.timestamp, 0, blessings[i].taxRate));
+        }
+    }
+
     function updateBlessing(string memory image, uint256 price, uint8 deleted, uint256 taxRate) public onlyOwner {
         console.log("start to remove one blessing from the pool! image:%s", image);
         for (uint256 i = 0; i < blessingList.length; i ++) {
@@ -347,6 +356,8 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
     function upgradeToNextVersion(address nextVersionContractAddress) public onlyOwner whenPaused {
         require(IERC20(cryptoBlessingTokenAddress).transfer(nextVersionContractAddress, IERC20(cryptoBlessingTokenAddress).balanceOf(address(this))), "Transfer CBT to next version address failed!");
         require(IERC20(sendTokenAddress).transfer(owner(), IERC20(sendTokenAddress).balanceOf(address(this))), "Transfer BUSD to owner failed!");
+        // transfer the status of this contract to the new one
+        
         ICryptoBlessingNFT(cryptoBlessingNFTAddress).transferOwnership(nextVersionContractAddress);
     }
 
