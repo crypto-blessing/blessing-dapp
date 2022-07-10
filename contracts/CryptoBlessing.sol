@@ -202,7 +202,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), tokenAmount), "Transfer to contract failed!");
 
         require(IERC20(sendTokenAddress).transferFrom(msg.sender, choosedBlessing.owner, claimQuantity.mul(choosedBlessing.price).mul(100 - choosedBlessing.taxRate).div(100)), "Transfer to the owner of blessing failed!");
-        require(IERC20(sendTokenAddress).transferFrom(msg.sender, address(this), claimQuantity.mul(choosedBlessing.price).mul(choosedBlessing.taxRate).div(100)), "Transfer to the contract failed!");
+        require(IERC20(sendTokenAddress).transferFrom(msg.sender, owner(), claimQuantity.mul(choosedBlessing.price).mul(choosedBlessing.taxRate).div(100)), "Transfer to the contract failed!");
 
         senderBlessingMapping[msg.sender].push(SenderBlessing(
             blessingID,
@@ -344,9 +344,10 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         _unpause();
     }
 
-    function upgradeToV2(address v2ContractAddress) public onlyOwner whenPaused {
-        require(IERC20(cryptoBlessingTokenAddress).transfer(v2ContractAddress, IERC20(cryptoBlessingTokenAddress).balanceOf(address(this))), "Transfer CBT to v2 address failed!");
-        ICryptoBlessingNFT(cryptoBlessingNFTAddress).transferOwnership(v2ContractAddress);
+    function upgradeToNextVersion(address nextVersionContractAddress) public onlyOwner whenPaused {
+        require(IERC20(cryptoBlessingTokenAddress).transfer(nextVersionContractAddress, IERC20(cryptoBlessingTokenAddress).balanceOf(address(this))), "Transfer CBT to next version address failed!");
+        require(IERC20(sendTokenAddress).transfer(owner(), IERC20(sendTokenAddress).balanceOf(address(this))), "Transfer BUSD to owner failed!");
+        ICryptoBlessingNFT(cryptoBlessingNFTAddress).transferOwnership(nextVersionContractAddress);
     }
 
 }

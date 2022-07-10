@@ -234,8 +234,8 @@ const ClaimPage = () => {
       setAlreadyClaimed(true)
       setLoading(true);
     } catch (e) {
-      console.log(e)
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
+      setAlertMsg(e.MESSAGE)
       setAlertOpen(true);
       setClaiming(false)
     }
@@ -537,7 +537,7 @@ const ClaimPage = () => {
         open={alertOpen} 
         onClose={handleAlertClose}
         autoHideDuration={3000}>
-        <Alert onClose={handleAlertClose} severity="info" sx={{ width: '100%', bgcolor: 'white' }}>
+        <Alert onClose={handleAlertClose} severity="error" sx={{ width: '100%', bgcolor: 'white' }}>
           {alertMsg}
         </Alert>
       </Snackbar>

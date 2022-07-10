@@ -138,10 +138,12 @@ describe("CryptoBlessing", function () {
         await sendBlessingTx.wait();
         senderBUSD = await BUSD.balanceOf(owner.address);
         console.log("after send senderBUSD: ", senderBUSD);
-        expect(senderBUSD).to.equal(BigInt(190 * 10 ** 18));
+        expect(senderBUSD).to.equal(BigInt(190 * 10 ** 18 + 10 * 10 / 100 * 10 ** 18));
+
         let cbBUSD = await BUSD.balanceOf(cryptoBlessing.address);
         console.log("after send cbBUSD: ", cbBUSD);
-        expect(cbBUSD).to.equal(BigInt(200 * 10 ** 18 + 10 * 10 / 100 * 10 ** 18));
+        expect(cbBUSD).to.equal(BigInt(200 * 10 ** 18));
+
         let blessingOwnerBUSD = await BUSD.balanceOf(blessingOwner.address);
         expect(blessingOwnerBUSD).to.equal(BigInt(10 * 90 / 100 * 10 ** 18));
 
@@ -496,7 +498,7 @@ describe("CryptoBlessing", function () {
 
     });
 
-    it("Upgrade to V2?", async function () {
+    it("Upgrade to next version?", async function () {
         // deploy contracts
         await deployCBToken();
         await deployCBNFT();
@@ -519,7 +521,7 @@ describe("CryptoBlessing", function () {
         const pausedTx = await cryptoBlessing.pause();
         await pausedTx.wait();
 
-        const upgradeToV2Tx = await cryptoBlessing.upgradeToV2(cryptoBlessing2.address);
+        const upgradeToV2Tx = await cryptoBlessing.upgradeToNextVersion(cryptoBlessing2.address);
         await upgradeToV2Tx.wait();
 
         blessingCB = await cbToken.balanceOf(cryptoBlessing2.address);
