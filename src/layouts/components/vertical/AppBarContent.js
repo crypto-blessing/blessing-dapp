@@ -23,6 +23,11 @@ import LogoutIcon from '@mui/icons-material/Logout';
 // ** Components
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 
 
 const AppBarContent = props => {
@@ -136,6 +141,25 @@ const AppBarContent = props => {
           Only support BSC network!
         </Alert>
       </Snackbar>
+
+      {/** System maintenance in progress */}
+
+      <Dialog
+        open={true}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"System maintenance in progress"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+          CryptoBlessing is being upgraded and maintained, please be patient for a more secure contract and a better experience.
+          </DialogContentText>
+        </DialogContent>
+      </Dialog>
+
+      {/** System maintenance in progress */}
     </Box>
   )
 }
