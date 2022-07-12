@@ -43,14 +43,14 @@ describe("CryptoBlessing", function () {
         expect(allBlessings.length).to.equal(0);
 
         // add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, "gong xi fa cai", BigInt(1 * 10 ** 18), 1, 10);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
         await addBlessingTx.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(1);
         expect(allBlessings[0].image).to.equal("blessing image");
 
         // add another blessing to the pool
-        const addBlessingTx2 = await cryptoBlessing.addBlessing("make love, not war", owner.address, "make love, not war", BigInt(9.9 * 10 ** 18), 2, 10);
+        const addBlessingTx2 = await cryptoBlessing.addBlessing("make love, not war", owner.address, BigInt(9.9 * 10 ** 18), 10);
         await addBlessingTx2.wait();
         allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(2);
@@ -83,27 +83,21 @@ describe("CryptoBlessing", function () {
         let allBlessings = await cryptoBlessing.getAllBlessings()
         expect(allBlessings.length).to.equal(0);
 
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, "gong xi fa cai", BigInt(1 * 10 ** 18), 1, 10);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
         await addBlessingTx.wait();
 
         // batch add blessing to the pool
         const batchAddBlessingTx = await cryptoBlessing.batchAddBlessing([{
             image: "blessing image", 
-            description: "gong xi fa cai", 
             price: BigInt(9 * 10 ** 18), 
             owner: owner.address, 
-            blessingType: 0,
-            timestamp: 0, 
             deleted: 1, 
             taxRate: 10
         }, 
         {
             image: "batch", 
-            description: "gong xi fa cai", 
             price: BigInt(9 * 10 ** 18), 
             owner: owner.address, 
-            blessingType: 0,
-            timestamp: 0, 
             deleted: 1, 
             taxRate: 10
         }, 
@@ -131,7 +125,7 @@ describe("CryptoBlessing", function () {
         // add blessing to the pool
         let err = "";
         try {
-            await cryptoBlessing.connect(anotherAddress).addBlessing("blessing image", owner.address,  "gong xi fa cai", BigInt(1 * 10 ** 18), 1, 10);
+            await cryptoBlessing.connect(anotherAddress).addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
         } catch(e) {
             err = e.message;
         }
@@ -168,7 +162,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
         await addBlessingTx.wait();
 
         // 2 check the balance of the sender BUSD = 400
@@ -248,7 +242,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
         await addBlessingTx.wait();
 
         
@@ -349,7 +343,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
         await addBlessingTx.wait();
 
         
@@ -432,7 +426,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
         await addBlessingTx.wait();
 
         // 2 check the balance of the sender BUSD = 400
@@ -512,7 +506,7 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
+        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
         await addBlessingTx.wait();
 
         

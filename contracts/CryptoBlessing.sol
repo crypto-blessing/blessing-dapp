@@ -132,11 +132,8 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
 
     struct Blessing {
         string image; // 祝福图片
-        string description; // 祝福描述
         uint256 price;
         address owner;
-        uint8 blessingType;
-        uint256 timestamp;
         uint8 deleted;
         uint256 taxRate; // 100
     }
@@ -149,14 +146,12 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
     function addBlessing(
         string memory image,
         address blessingOwner,
-        string memory description,
         uint256 price,
-        uint8 blessingType,
         uint256 taxRate
     ) public onlyOwner {
         console.log("start to add blessing to the pool!");
         blessingList.push(Blessing(
-            image, description, price, blessingOwner, blessingType, block.timestamp, 0, taxRate
+            image, price, blessingOwner, 0, taxRate
         ));
     }
 
@@ -165,7 +160,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
     ) public onlyOwner {
         console.log("start to add blessing to the pool!");
         for (uint256 i = 0; i < blessings.length; i ++) {
-            blessingList.push(Blessing(blessings[i].image, blessings[i].description, blessings[i].price, blessings[i].owner, blessings[i].blessingType, block.timestamp, 0, blessings[i].taxRate));
+            blessingList.push(Blessing(blessings[i].image, blessings[i].price, blessings[i].owner, 0, blessings[i].taxRate));
         }
     }
 
