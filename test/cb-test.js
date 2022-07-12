@@ -174,12 +174,23 @@ describe("CryptoBlessing", function () {
         // 2 check the balance of the sender BUSD = 400
         let senderBUSD = await BUSD.balanceOf(owner.address);
 
+        const blessingKeypair1 = ethers.Wallet.createRandom();
+        const blessingKeypair2 = ethers.Wallet.createRandom();
+        const blessingKeypair3 = ethers.Wallet.createRandom();
+        const blessingKeypair4 = ethers.Wallet.createRandom();
+        const blessingKeypair5 = ethers.Wallet.createRandom();
+        const blessingKeypair6 = ethers.Wallet.createRandom();
+        const blessingKeypair7 = ethers.Wallet.createRandom();
+        const blessingKeypair8 = ethers.Wallet.createRandom();
+        const blessingKeypair9 = ethers.Wallet.createRandom();
+        const blessingKeypair10 = ethers.Wallet.createRandom();
+
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.sendBlessing(
             "blessing image", blessingKeypair.address, 
             sendBUSDAmount, 
             claimQuantity,
-            0 
+            0, [blessingKeypair1.address, blessingKeypair2.address, blessingKeypair3.address, blessingKeypair4.address, blessingKeypair5.address, blessingKeypair6.address, blessingKeypair7.address, blessingKeypair8.address, blessingKeypair9.address, blessingKeypair10.address],
         );
         await sendBlessingTx.wait();
         senderBUSD = await BUSD.balanceOf(owner.address);
@@ -240,12 +251,24 @@ describe("CryptoBlessing", function () {
         const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
         await addBlessingTx.wait();
 
+        
+        const blessingKeypair1 = ethers.Wallet.createRandom();
+        const blessingKeypair2 = ethers.Wallet.createRandom();
+        const blessingKeypair3 = ethers.Wallet.createRandom();
+        const blessingKeypair4 = ethers.Wallet.createRandom();
+        const blessingKeypair5 = ethers.Wallet.createRandom();
+        const blessingKeypair6 = ethers.Wallet.createRandom();
+        const blessingKeypair7 = ethers.Wallet.createRandom();
+        const blessingKeypair8 = ethers.Wallet.createRandom();
+        const blessingKeypair9 = ethers.Wallet.createRandom();
+        const blessingKeypair10 = ethers.Wallet.createRandom();
+
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.connect(sender).sendBlessing(
             "blessing image", blessingKeypair.address, 
             sendBUSDAmount, 
             claimQuantity,
-            0 
+            0, [blessingKeypair1.address, blessingKeypair2.address, blessingKeypair3.address, blessingKeypair4.address, blessingKeypair5.address, blessingKeypair6.address, blessingKeypair7.address, blessingKeypair8.address, blessingKeypair9.address, blessingKeypair10.address],
         );
         await sendBlessingTx.wait();
         console.log("start to sign the blessing, the private key is: ", blessingKeypair.privateKey);
@@ -253,7 +276,7 @@ describe("CryptoBlessing", function () {
         const MESSAGE = web3.utils.sha3('CryptoBlessing');
         
         // const signature = await blessingKeypair.signMessage(MESSAGE)
-        const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair.privateKey);
+        const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair1.privateKey);
 
         // const signature = await web3.eth.sign(MESSAGE, blessingKeypair.address);
 
@@ -329,32 +352,48 @@ describe("CryptoBlessing", function () {
         const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
         await addBlessingTx.wait();
 
+        
+        const blessingKeypair1 = ethers.Wallet.createRandom();
+        const blessingKeypair2 = ethers.Wallet.createRandom();
+        const blessingKeypair3 = ethers.Wallet.createRandom();
+        const blessingKeypair4 = ethers.Wallet.createRandom();
+        const blessingKeypair5 = ethers.Wallet.createRandom();
+        const blessingKeypair6 = ethers.Wallet.createRandom();
+        const blessingKeypair7 = ethers.Wallet.createRandom();
+        const blessingKeypair8 = ethers.Wallet.createRandom();
+        const blessingKeypair9 = ethers.Wallet.createRandom();
+        const blessingKeypair10 = ethers.Wallet.createRandom();
+
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.connect(sender).sendBlessing(
             "blessing image", blessingKeypair.address, 
             sendBUSDAmount, 
             claimQuantity,
-            0 
+            0, [blessingKeypair1.address, blessingKeypair2.address, blessingKeypair3.address, blessingKeypair4.address, blessingKeypair5.address, blessingKeypair6.address, blessingKeypair7.address, blessingKeypair8.address, blessingKeypair9.address, blessingKeypair10.address],
         );
         await sendBlessingTx.wait();
 
         const MESSAGE = web3.utils.sha3('CryptoBlessing');
-        const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair.privateKey);
+
+        const signature1 = await web3.eth.accounts.sign(MESSAGE, blessingKeypair1.privateKey);
 
         // 3 fake  claim the blessing
         const claimBlessingTx = await cryptoBlessing.connect(claimer1).claimBlessing(
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
+            signature1.signature,
             claimer1.address
         );
+
+        const blessingKeypairWrong = ethers.Wallet.createRandom();
+        const signature2 = await web3.eth.accounts.sign(MESSAGE, blessingKeypair10.privateKey);
 
         const claimBlessing2Tx = await cryptoBlessing.connect(claimer2).claimBlessing(
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
+            signature2.signature,
             claimer2.address
         );
         await claimBlessingTx.wait();
@@ -400,12 +439,24 @@ describe("CryptoBlessing", function () {
         let senderBUSD = await BUSD.balanceOf(owner.address);
         console.log("senderBUSD: ", senderBUSD);
 
+        
+        const blessingKeypair1 = ethers.Wallet.createRandom();
+        const blessingKeypair2 = ethers.Wallet.createRandom();
+        const blessingKeypair3 = ethers.Wallet.createRandom();
+        const blessingKeypair4 = ethers.Wallet.createRandom();
+        const blessingKeypair5 = ethers.Wallet.createRandom();
+        const blessingKeypair6 = ethers.Wallet.createRandom();
+        const blessingKeypair7 = ethers.Wallet.createRandom();
+        const blessingKeypair8 = ethers.Wallet.createRandom();
+        const blessingKeypair9 = ethers.Wallet.createRandom();
+        const blessingKeypair10 = ethers.Wallet.createRandom();
+
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.sendBlessing(
             "blessing image", blessingKeypair.address, 
             sendBUSDAmount, 
             claimQuantity,
-            0 
+            0, [blessingKeypair1.address, blessingKeypair2.address, blessingKeypair3.address, blessingKeypair4.address, blessingKeypair5.address, blessingKeypair6.address, blessingKeypair7.address, blessingKeypair8.address, blessingKeypair9.address, blessingKeypair10.address],
         );
         await sendBlessingTx.wait();
 
@@ -464,12 +515,19 @@ describe("CryptoBlessing", function () {
         const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, "gong xi fa cai", blessingPrice, 1, 10);
         await addBlessingTx.wait();
 
+        
+        const blessingKeypair1 = ethers.Wallet.createRandom();
+        const blessingKeypair2 = ethers.Wallet.createRandom();
+        const blessingKeypair3 = ethers.Wallet.createRandom();
+        const blessingKeypair4 = ethers.Wallet.createRandom();
+        const blessingKeypair5 = ethers.Wallet.createRandom();
+
         // 2 send blessing
         const sendBlessingTx = await cryptoBlessing.connect(sender).sendBlessing(
             "blessing image", blessingKeypair.address, 
             sendBUSDAmount, 
             claimQuantity,
-            1
+            0, [blessingKeypair1.address, blessingKeypair2.address, blessingKeypair3.address, blessingKeypair4.address, blessingKeypair5.address],
         );
         await sendBlessingTx.wait();
         console.log("start to sign the blessing, the private key is: ", blessingKeypair.privateKey);
@@ -477,59 +535,66 @@ describe("CryptoBlessing", function () {
         const MESSAGE = web3.utils.sha3('CryptoBlessing');
         
         // const signature = await blessingKeypair.signMessage(MESSAGE)
-        const signature = await web3.eth.accounts.sign(MESSAGE, blessingKeypair.privateKey);
+        const signature1 = await web3.eth.accounts.sign(MESSAGE, blessingKeypair1.privateKey);
 
         // 3 claim the blessing
         const claim1BlessingTx = await cryptoBlessing.connect(claimer1).claimBlessing(
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
+            signature1.signature,
             claimer1.address
         );
         await claim1BlessingTx.wait();
         let claimer1BUSD = await BUSD.balanceOf(claimer1.address);
         console.log("claimer1BUSD: ", ethers.utils.formatEther(claimer1BUSD));
 
+        const signature2 = await web3.eth.accounts.sign(MESSAGE, blessingKeypair2.privateKey);
 
         const claim2BlessingTx = await cryptoBlessing.connect(claimer2).claimBlessing(
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
+            signature2.signature,
             claimer2.address
         );
         await claim2BlessingTx.wait();
         let claimer2BUSD = await BUSD.balanceOf(claimer2.address);
         console.log("claimer2BUSD: ", ethers.utils.formatEther(claimer2BUSD));
 
+        const signature3 = await web3.eth.accounts.sign(MESSAGE, blessingKeypair3.privateKey);
+
         const claim3BlessingTx = await cryptoBlessing.connect(claimer3).claimBlessing(
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
+            signature3.signature,
             claimer3.address
         );
         await claim3BlessingTx.wait();
         let claimer3BUSD = await BUSD.balanceOf(claimer3.address);
         console.log("claimer3BUSD: ", ethers.utils.formatEther(claimer3BUSD));
 
+        const signature4 = await web3.eth.accounts.sign(MESSAGE, blessingKeypair4.privateKey);
+
         const claim4BlessingTx = await cryptoBlessing.connect(claimer4).claimBlessing(
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
+            signature4.signature,
             claimer4.address
         );
         await claim4BlessingTx.wait();
         let claimer4BUSD = await BUSD.balanceOf(claimer4.address);
         console.log("claimer4BUSD: ", ethers.utils.formatEther(claimer4BUSD));
 
+        const signature5 = await web3.eth.accounts.sign(MESSAGE, blessingKeypair5.privateKey);
+
         const claim5BlessingTx = await cryptoBlessing.connect(claimer5).claimBlessing(
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
+            signature5.signature,
             claimer5.address
         );
         await claim5BlessingTx.wait();

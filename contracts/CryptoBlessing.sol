@@ -185,19 +185,24 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         return (keccak256(bytes(a)) == keccak256(bytes(b)));
     }
 
+    struct ClaimPubkeyStatus {
+        address pubkey;
+        bool used;
+    }
+
+    mapping(address => ClaimPubkeyStatus[]) internal blessingPubkeyStatusMapping;
+
     function sendBlessing(
         string memory image,
         address blessingID,
         uint256 tokenAmount,
         uint256 claimQuantity,
-        ClaimType claimType
+        ClaimType claimType,
+        address[] memory pubkeys
     ) public whenNotPaused {
-        console.log("start to send blessing! image:%s, blessingID:%s", image, blessingID);
-        console.log("tokenAmount: %s", tokenAmount);
-        console.log("claimQuantity: %s", claimQuantity);
-        console.log("claimType: %s", uint(claimType));
         require(0 < tokenAmount, "tokenAmount must be greater than 0");
-        require(0 < claimQuantity && claimQuantity <= 1000, "claimQuantity must be greater than 0 and less or equal than 1000");
+        require(0 < claimQuantity && claimQuantity <= 10, "claimQuantity must be greater than 0 and less or equal than 10");
+        require(claimQuantity == pubkeys.length, "claimQuantity must be equal to pubkeys.length");
         Blessing memory choosedBlessing;
         for (uint256 i = 0; i < blessingList.length; i ++) {
             if (compareStrings(blessingList[i].image, image)) {
@@ -222,6 +227,13 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
             claimType,
             false
         ));
+
+        // init the blessing claim pubkey status, claimer will use unique privatekey to sign the claim
+        for(uint256 i = 0; i < pubkeys.length; i ++) {
+            blessingPubkeyStatusMapping[blessingID].push(ClaimPubkeyStatus(
+                pubkeys[i], false
+            ));
+        }
 
         emit senderSendCompleted(msg.sender, blessingID);
     }
@@ -340,9 +352,15 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         return rand;
     }
 
-    function _verify(bytes32 data, bytes memory signature, address account) internal pure returns (bool) {
+    function _verify(bytes32 data, bytes memory signature, address blessingID) internal returns (bool) {
         address signatureAddress = ECDSA.recover(data, signature);
-        return signatureAddress == account;
+        for(uint256 i = 0; i < blessingPubkeyStatusMapping[blessingID].length; i ++) {
+            if (blessingPubkeyStatusMapping[blessingID][i].pubkey == signatureAddress && !blessingPubkeyStatusMapping[blessingID][i].used) {
+                blessingPubkeyStatusMapping[blessingID][i].used = true;
+                return true;
+            }
+        }
+        return false;
     }
 
     function pause() public onlyOwner {
