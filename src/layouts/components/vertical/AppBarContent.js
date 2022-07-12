@@ -144,7 +144,7 @@ const AppBarContent = props => {
 
       {/** System maintenance in progress */}
 
-      {/* <Dialog
+      <Dialog
         open={true}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
@@ -157,7 +157,7 @@ const AppBarContent = props => {
           CryptoBlessing is being upgraded and maintained, please be patient for a more secure contract and a better experience.
           </DialogContentText>
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
 
       {/** System maintenance in progress */}
     </Box>
