@@ -6,6 +6,10 @@ import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Divider from '@mui/material/Divider'
+import Link from '@mui/material/Link'
+import Twitter from 'mdi-material-ui/Twitter'
+import Telegram from '@mui/icons-material/Telegram';
 
 
 import {injected} from 'src/@core/components/wallet/connector'
@@ -178,6 +182,20 @@ const AppBarContent = props => {
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
           {alertMessage}
+          </DialogContentText>
+          <Divider />
+          <DialogContentText id="alert-dialog-description" align='right'>
+            Follow us on: 
+            <Link target='_blank' href='https://twitter.com/cryptoblessing4'>
+              <IconButton>
+                <Twitter sx={{ color: '#1da1f2' }} />
+              </IconButton>
+            </Link>
+            <Link target='_blank' href='https://t.me/crypto_blessing_eng'>
+              <IconButton>
+                <Telegram sx={{ color: '#1da1f2' }} />
+              </IconButton>
+            </Link>
           </DialogContentText>
         </DialogContent>
       </Dialog>
