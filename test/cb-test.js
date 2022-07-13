@@ -39,36 +39,30 @@ describe("CryptoBlessing", function () {
         await deployBUSD();
         await deployCryptoBlessing();
         
-        let allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings.length).to.equal(0);
-
         // add blessing to the pool
         const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
         await addBlessingTx.wait();
-        allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings.length).to.equal(1);
-        expect(allBlessings[0].image).to.equal("blessing image");
+        let blessing = await cryptoBlessing.getBlessing("blessing image")
+        expect(blessing.taxRate).to.equal(10);
 
         // add another blessing to the pool
         const addBlessingTx2 = await cryptoBlessing.addBlessing("make love, not war", owner.address, BigInt(9.9 * 10 ** 18), 10);
         await addBlessingTx2.wait();
-        allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings.length).to.equal(2);
-        expect(allBlessings[1].price).to.equal(BigInt(9.9 * 10 ** 18));
-        expect(allBlessings[1].deleted).to.equal(0);
+        blessing = await cryptoBlessing.getBlessing("make love, not war")
+        expect(blessing.price).to.equal(BigInt(9.9 * 10 ** 18));
+        expect(blessing.deleted).to.equal(0);
 
         // remove blessing from the pool
-        const removeBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, BigInt(1 * 10 ** 18), 1, 10);
+        const removeBlessingTx = await cryptoBlessing.updateBlessing("blessing image", BigInt(1 * 10 ** 18), 1, 10);
         await removeBlessingTx.wait();
-        allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings.length).to.equal(2);
-        expect(allBlessings[0].deleted).to.equal(1);
+        blessing = await cryptoBlessing.getBlessing("blessing image")
+        expect(blessing.deleted).to.equal(1);
 
         // recover blessing from the pool
-        const recoverBlessingTx = await cryptoBlessing.updateBlessing(allBlessings[0].image, BigInt(9.9 * 10 ** 18), 0, 10);
+        const recoverBlessingTx = await cryptoBlessing.updateBlessing("blessing image", BigInt(9.9 * 10 ** 18), 0, 10);
         await recoverBlessingTx.wait();
-        allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings[0].deleted).to.equal(0);
+        blessing = await cryptoBlessing.getBlessing("blessing image")
+        expect(blessing.deleted).to.equal(0);
     });
 
     it("Should batch add blessings", async function () {
@@ -80,33 +74,26 @@ describe("CryptoBlessing", function () {
         await deployBUSD();
         await deployCryptoBlessing();
         
-        let allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings.length).to.equal(0);
-
         const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
         await addBlessingTx.wait();
 
         // batch add blessing to the pool
-        const batchAddBlessingTx = await cryptoBlessing.batchAddBlessing([{
-            image: "blessing image", 
-            price: BigInt(9 * 10 ** 18), 
+        const batchAddBlessingTx = await cryptoBlessing.batchAddBlessing(["blessing image","batch"], [{
+            price: BigInt(1 * 10 ** 18), 
             owner: owner.address, 
             deleted: 1, 
             taxRate: 10
         }, 
         {
-            image: "batch", 
-            price: BigInt(9 * 10 ** 18), 
+            price: BigInt(19 * 10 ** 18), 
             owner: owner.address, 
             deleted: 1, 
             taxRate: 10
         }, 
         ]);
         await batchAddBlessingTx.wait();
-        allBlessings = await cryptoBlessing.getAllBlessings()
-        expect(allBlessings.length).to.equal(3);
-        expect(allBlessings[1].price).to.equal(BigInt(9 * 10 ** 18));
-        expect(allBlessings[2].image).to.equal("batch");
+        blessing = await cryptoBlessing.getBlessing("batch")
+        expect(blessing.price).to.equal(BigInt(19 * 10 ** 18));
     });
 
 

@@ -59,6 +59,45 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         RANDOM_CLAIM
     }
 
+    struct Blessing {
+        uint256 price;
+        address owner;
+        uint8 deleted;
+        uint256 taxRate;
+    }
+    mapping (string => Blessing) blessingMapping;
+
+    function getBlessing(string memory image) public view returns (Blessing memory) {
+        return blessingMapping[image];
+    }
+
+    function addBlessing(
+        string memory image,
+        address blessingOwner,
+        uint256 price,
+        uint256 taxRate
+    ) public onlyOwner {
+        console.log("start to add blessing to the pool!");
+        blessingMapping[image] = Blessing(price, blessingOwner, 0, taxRate);
+    }
+
+    function batchAddBlessing(
+        string[] memory images,
+        Blessing[] memory blessings
+    ) public onlyOwner {
+        console.log("start to add blessing to the pool!");
+        for (uint256 i = 0; i < blessings.length; i ++) {
+            blessingMapping[images[i]] = Blessing(blessings[i].price, blessings[i].owner, 0, blessings[i].taxRate);
+        }
+    }
+
+    function updateBlessing(string memory image, uint256 price, uint8 deleted, uint256 taxRate) public onlyOwner {
+        console.log("start to remove one blessing from the pool! image:%s", image);
+        blessingMapping[image].price = price;
+        blessingMapping[image].deleted = deleted;
+        blessingMapping[image].taxRate = taxRate;
+    }
+
     struct SenderBlessing {
         address blessingID;
         string blessingImage;
@@ -86,14 +125,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         }
         require(choosedSenderBlessing.tokenAmount > 0, "There is no blessing found on this sender!");
         BlessingClaimStatus[] memory blessingClaimStatus = blessingClaimStatusMapping[blessingID];
-        Blessing memory choosedBlessing;
-        for (uint256 i = 0; i < blessingList.length; i ++) {
-            if (compareStrings(blessingList[i].image, choosedSenderBlessing.blessingImage)) {
-                choosedBlessing = blessingList[i];
-                break;
-            }
-        }
-        return (choosedBlessing, choosedSenderBlessing, blessingClaimStatus);
+        return (blessingMapping[choosedSenderBlessing.blessingImage], choosedSenderBlessing, blessingClaimStatus);
     }
 
     struct ClaimerBlessing {
@@ -130,52 +162,6 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         return blessingClaimStatusMapping[_blessingID];
     }
 
-    struct Blessing {
-        string image; // 祝福图片
-        uint256 price;
-        address owner;
-        uint8 deleted;
-        uint256 taxRate; // 100
-    }
-    Blessing[] public blessingList;
-
-    function getAllBlessings() public view returns (Blessing[] memory) {
-        return blessingList;
-    }
-
-    function addBlessing(
-        string memory image,
-        address blessingOwner,
-        uint256 price,
-        uint256 taxRate
-    ) public onlyOwner {
-        console.log("start to add blessing to the pool!");
-        blessingList.push(Blessing(
-            image, price, blessingOwner, 0, taxRate
-        ));
-    }
-
-    function batchAddBlessing(
-        Blessing[] memory blessings
-    ) public onlyOwner {
-        console.log("start to add blessing to the pool!");
-        for (uint256 i = 0; i < blessings.length; i ++) {
-            blessingList.push(Blessing(blessings[i].image, blessings[i].price, blessings[i].owner, 0, blessings[i].taxRate));
-        }
-    }
-
-    function updateBlessing(string memory image, uint256 price, uint8 deleted, uint256 taxRate) public onlyOwner {
-        console.log("start to remove one blessing from the pool! image:%s", image);
-        for (uint256 i = 0; i < blessingList.length; i ++) {
-            if (compareStrings(blessingList[i].image, image)) {
-                blessingList[i].deleted = deleted;
-                blessingList[i].price = price;
-                blessingList[i].taxRate = taxRate;
-                break;
-            }
-        }
-    }
-
     function compareStrings(string memory a, string memory b) internal pure returns (bool) {
         return (keccak256(bytes(a)) == keccak256(bytes(b)));
     }
@@ -198,13 +184,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         require(0 < tokenAmount, "tokenAmount must be greater than 0");
         require(0 < claimQuantity && claimQuantity <= 10, "claimQuantity must be greater than 0 and less or equal than 10");
         require(claimQuantity == pubkeys.length, "claimQuantity must be equal to pubkeys.length");
-        Blessing memory choosedBlessing;
-        for (uint256 i = 0; i < blessingList.length; i ++) {
-            if (compareStrings(blessingList[i].image, image)) {
-                choosedBlessing = blessingList[i];
-                break;
-            }
-        }
+        Blessing memory choosedBlessing = blessingMapping[image];
         require(choosedBlessing.price > 0 && choosedBlessing.deleted == 0, "Invalid blessing status!");
         require(IERC20(sendTokenAddress).balanceOf(msg.sender) >= tokenAmount.add((claimQuantity.mul(choosedBlessing.price))), "Your token amount must be greater than you are trying to send!");
         // require(IERC20(sendTokenAddress).approve(address(this), tokenAmount), "Approve failed!");
