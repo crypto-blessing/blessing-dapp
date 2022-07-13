@@ -182,7 +182,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         address[] memory pubkeys
     ) public whenNotPaused {
         require(0 < tokenAmount, "tokenAmount must be greater than 0");
-        require(0 < claimQuantity && claimQuantity <= 10, "claimQuantity must be greater than 0 and less or equal than 10");
+        require(0 < claimQuantity && claimQuantity <= 13, "claimQuantity must be greater than 0 and less or equal than 13");
         require(claimQuantity == pubkeys.length, "claimQuantity must be equal to pubkeys.length");
         Blessing memory choosedBlessing = blessingMapping[image];
         require(choosedBlessing.price > 0 && choosedBlessing.deleted == 0, "Invalid blessing status!");
@@ -238,11 +238,9 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         address sender,
         address blessingID,
         bytes32 hash,
-        bytes memory signature,
-        address fuckOff
+        bytes memory signature
     ) payable public whenNotPaused nonReentrant returns (ClaimerBlessing memory){
         console.log("start to claim blessing! sender:%s, blessingID:%s", sender, blessingID);
-        require(fuckOff == msg.sender, "fuckOff!!!");
         require(_verify(hash, signature, blessingID), "Invalid signiture!");
         console.log("signature is valid!");
         require(!Address.isContract(msg.sender), "You can not claim blessing from contract!");

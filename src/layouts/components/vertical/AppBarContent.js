@@ -34,6 +34,9 @@ const AppBarContent = props => {
 
   const { active, account, library, connector, activate, deactivate, chainId } = useWeb3React()
 
+  const [alertTitle, setAlertTitle] = useState('')
+  const [alertMessage, setAlertMessage] = useState('')
+
   async function connect() {
     try {
       injected.isAuthorized().then((isAuthorized) => {
@@ -88,6 +91,26 @@ const AppBarContent = props => {
   const handleClose = () => {
     setOpen(false);
   }
+
+  useEffect(() => {
+    switch (chainId) {
+      case 56:
+        setAlertTitle('System maintenance in progress')
+        setAlertMessage('CryptoBlessing is being upgraded and maintained, please be patient for a more secure contract and a better experience.')
+        break;
+      case 97:
+        setAlertTitle('BSC Testnet')
+        setAlertMessage('You are now on BSC Testnet.')
+        break;
+      case 1337:
+        setAlertTitle('Localnet')
+        setAlertMessage('You are now on Localnet.')
+        break;
+      default:
+        setAlertTitle('Don\'t support this network')
+        setAlertMessage('Please switch your network to BSC Mainnet(chainID: 56).')
+    }
+  }, [chainId])
 
   return (
 
@@ -145,16 +168,16 @@ const AppBarContent = props => {
       {/** System maintenance in progress */}
 
       <Dialog
-        open={true}
+        open={chainId != 97 && chainId != 1337}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          {"System maintenance in progress"}
+          {alertTitle}
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-          CryptoBlessing is being upgraded and maintained, please be patient for a more secure contract and a better experience.
+          {alertMessage}
           </DialogContentText>
         </DialogContent>
       </Dialog>

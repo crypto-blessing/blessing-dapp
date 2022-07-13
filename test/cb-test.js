@@ -269,8 +269,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature.signature,
-            claimer.address
+            signature.signature
         );
         await claimBlessingTx.wait();
         let claimerBUSD = await BUSD.balanceOf(claimer.address);
@@ -363,8 +362,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature1.signature,
-            claimer1.address
+            signature1.signature
         );
 
         const blessingKeypairWrong = ethers.Wallet.createRandom();
@@ -374,8 +372,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature2.signature,
-            claimer2.address
+            signature2.signature
         );
         await claimBlessingTx.wait();
         await claimBlessing2Tx.wait();
@@ -523,8 +520,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature1.signature,
-            claimer1.address
+            signature1.signature
         );
         await claim1BlessingTx.wait();
         let claimer1BUSD = await BUSD.balanceOf(claimer1.address);
@@ -536,8 +532,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature2.signature,
-            claimer2.address
+            signature2.signature
         );
         await claim2BlessingTx.wait();
         let claimer2BUSD = await BUSD.balanceOf(claimer2.address);
@@ -549,8 +544,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature3.signature,
-            claimer3.address
+            signature3.signature
         );
         await claim3BlessingTx.wait();
         let claimer3BUSD = await BUSD.balanceOf(claimer3.address);
@@ -562,8 +556,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature4.signature,
-            claimer4.address
+            signature4.signature
         );
         await claim4BlessingTx.wait();
         let claimer4BUSD = await BUSD.balanceOf(claimer4.address);
@@ -575,8 +568,7 @@ describe("CryptoBlessing", function () {
             sender.address,
             blessingKeypair.address,
             toEthSignedMessageHash(MESSAGE),
-            signature5.signature,
-            claimer5.address
+            signature5.signature
         );
         await claim5BlessingTx.wait();
         let claimer5BUSD = await BUSD.balanceOf(claimer5.address);
