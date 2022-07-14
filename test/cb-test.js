@@ -40,26 +40,50 @@ describe("CryptoBlessing", function () {
         await deployCryptoBlessing();
         
         // add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
+        const addBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: BigInt(1 * 10 ** 18), 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx.wait();
         let blessing = await cryptoBlessing.getBlessing("blessing image")
         expect(blessing.taxRate).to.equal(10);
 
         // add another blessing to the pool
-        const addBlessingTx2 = await cryptoBlessing.addBlessing("make love, not war", owner.address, BigInt(9.9 * 10 ** 18), 10);
+        const addBlessingTx2 = await cryptoBlessing.batchUpdateBlessing(["make love, not war"], [{
+            price: BigInt(9.9 * 10 ** 18), 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx2.wait();
         blessing = await cryptoBlessing.getBlessing("make love, not war")
         expect(blessing.price).to.equal(BigInt(9.9 * 10 ** 18));
         expect(blessing.deleted).to.equal(0);
 
         // remove blessing from the pool
-        const removeBlessingTx = await cryptoBlessing.updateBlessing("blessing image", BigInt(1 * 10 ** 18), 1, 10);
+        const removeBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: BigInt(1 * 10 ** 18), 
+            owner: owner.address, 
+            deleted: 1, 
+            taxRate: 10
+        }
+        ]);
         await removeBlessingTx.wait();
         blessing = await cryptoBlessing.getBlessing("blessing image")
         expect(blessing.deleted).to.equal(1);
 
         // recover blessing from the pool
-        const recoverBlessingTx = await cryptoBlessing.updateBlessing("blessing image", BigInt(9.9 * 10 ** 18), 0, 10);
+        const recoverBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: BigInt(9.9 * 10 ** 18), 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await recoverBlessingTx.wait();
         blessing = await cryptoBlessing.getBlessing("blessing image")
         expect(blessing.deleted).to.equal(0);
@@ -74,11 +98,17 @@ describe("CryptoBlessing", function () {
         await deployBUSD();
         await deployCryptoBlessing();
         
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
+        const addBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: BigInt(1 * 10 ** 18), 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx.wait();
 
         // batch add blessing to the pool
-        const batchAddBlessingTx = await cryptoBlessing.batchAddBlessing(["blessing image","batch"], [{
+        const batchAddBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image","batch"], [{
             price: BigInt(1 * 10 ** 18), 
             owner: owner.address, 
             deleted: 1, 
@@ -112,7 +142,13 @@ describe("CryptoBlessing", function () {
         // add blessing to the pool
         let err = "";
         try {
-            await cryptoBlessing.connect(anotherAddress).addBlessing("blessing image", owner.address, BigInt(1 * 10 ** 18), 10);
+            await cryptoBlessing.connect(anotherAddress).batchUpdateBlessing(["blessing image"], [{
+                price: BigInt(1 * 10 ** 18), 
+                owner: owner.address, 
+                deleted: 0, 
+                taxRate: 10
+            }
+            ]);
         } catch(e) {
             err = e.message;
         }
@@ -121,7 +157,13 @@ describe("CryptoBlessing", function () {
 
         // remove blessing from the pool
         try {
-            await cryptoBlessing.connect(anotherAddress).updateBlessing("test image", BigInt(0.9 * 10 ** 18), 1, 10);
+            await cryptoBlessing.connect(anotherAddress).batchUpdateBlessing(["blessing image"], [{
+                price: BigInt(0.9 * 10 ** 18), 
+                owner: owner.address, 
+                deleted: 1, 
+                taxRate: 10
+            }
+            ]);
         } catch(e) {
             err = e.message;
         }
@@ -149,7 +191,13 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
+        const addBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: blessingPrice,
+            owner: blessingOwner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx.wait();
 
         // 2 check the balance of the sender BUSD = 400
@@ -229,7 +277,13 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
+        const addBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: blessingPrice, 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx.wait();
 
         
@@ -329,7 +383,13 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
+        const addBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: blessingPrice, 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx.wait();
 
         
@@ -410,7 +470,13 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
+        const addBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: blessingPrice, 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx.wait();
 
         // 2 check the balance of the sender BUSD = 400
@@ -490,7 +556,13 @@ describe("CryptoBlessing", function () {
         await approveBUSDTx.wait();
 
         // 1 add blessing to the pool
-        const addBlessingTx = await cryptoBlessing.addBlessing("blessing image", blessingOwner.address, blessingPrice, 10);
+        const addBlessingTx = await cryptoBlessing.batchUpdateBlessing(["blessing image"], [{
+            price: blessingPrice, 
+            owner: owner.address, 
+            deleted: 0, 
+            taxRate: 10
+        }
+        ]);
         await addBlessingTx.wait();
 
         

@@ -71,31 +71,14 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         return blessingMapping[image];
     }
 
-    function addBlessing(
-        string memory image,
-        address blessingOwner,
-        uint256 price,
-        uint256 taxRate
-    ) public onlyOwner {
-        console.log("start to add blessing to the pool!");
-        blessingMapping[image] = Blessing(price, blessingOwner, 0, taxRate);
-    }
-
-    function batchAddBlessing(
+    function batchUpdateBlessing(
         string[] memory images,
         Blessing[] memory blessings
     ) public onlyOwner {
         console.log("start to add blessing to the pool!");
         for (uint256 i = 0; i < blessings.length; i ++) {
-            blessingMapping[images[i]] = Blessing(blessings[i].price, blessings[i].owner, 0, blessings[i].taxRate);
+            blessingMapping[images[i]] = Blessing(blessings[i].price, blessings[i].owner, blessings[i].deleted, blessings[i].taxRate);
         }
-    }
-
-    function updateBlessing(string memory image, uint256 price, uint8 deleted, uint256 taxRate) public onlyOwner {
-        console.log("start to remove one blessing from the pool! image:%s", image);
-        blessingMapping[image].price = price;
-        blessingMapping[image].deleted = deleted;
-        blessingMapping[image].taxRate = taxRate;
     }
 
     struct SenderBlessing {
