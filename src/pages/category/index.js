@@ -13,7 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import { Button, Divider, Slider } from '@mui/material'
 import KeyboardReturnIcon from '@mui/icons-material/KeyboardReturn';
 
-const CategoryMarket = () => {
+const Category = () => {
 
     const [categoriesWithItems, setCategoriesWithItems] = useState([])
     const router = useRouter()
@@ -69,4 +69,4 @@ const CategoryMarket = () => {
     )
 }
 
-export default CategoryMarket
+export default Category
