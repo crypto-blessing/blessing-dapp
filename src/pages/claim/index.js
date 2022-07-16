@@ -103,7 +103,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }
 }))
 
-const ClaimPage = ({blessingInDB}) => {
+const ClaimPage = () => {
   const [sender, setSender] = useState('')
   const [blessingID, setBlessingID] = useState('')
   const [claimKey, setClaimKey] = useState('')
@@ -120,11 +120,16 @@ const ClaimPage = ({blessingInDB}) => {
       if (localStorage.getItem('my_claimed_' + decode(blessing)) === '1' || localStorage.getItem('my_blessing_claim_key_' + decode(blessing)) != undefined) {
         setAlreadyClaimed(true)
       }
-
+      fetch(`/api/items/fetchOneItem?blessing_id=${decode(blessing)}`)
+          .then((res) => res.json())
+          .then((data) => {
+            setBlessingInDB(data)
+          })
   }, [router.query])
   
 
   const [blessing, setBlessing] = useState({})
+  const [blessingInDB, setBlessingInDB] = useState({})
   const [blessingSended, setBlessingSended] = useState({})
   const [claimList, setClaimList] = useState([])
   const [claimedAmount, setClaimedAmount] = useState(0)
@@ -550,17 +555,5 @@ const ClaimPage = ({blessingInDB}) => {
   )
 }
 
-ClaimPage.getInitialProps = async (context) => {
-  const { req, res, query } = context;
-  res.setHeader(
-      'Cache-Control',
-      'public, s-maxage=10, stale-while-revalidate=59'
-    )
-  const proto = req.connection.encrypted ? "https" : "http";
-  const res1 = await fetch(`${proto}://${req.headers.host}/api/items/fetchOneItem?blessing_id=${decode(query.blessing)}`)
-  const blessingInDB = await res1.json()
-
-  return { props: { blessingInDB } }
-}
 
 export default ClaimPage

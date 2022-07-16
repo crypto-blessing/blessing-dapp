@@ -16,10 +16,12 @@ import { useEffect, useState } from "react"
 import { Block } from '@mui/icons-material'
 import { Divider, Slider } from '@mui/material'
 
-const Blessings = ({ categoriesWithItems }) => {
+const Blessings = () => {
 
     const { active, account, chainId } = useWeb3React()
     const [blessings, setBlessings] = useState([])
+
+    const [categoriesWithItems, setCategoriesWithItems] = useState([])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     // async function fetchBlessings() {o09
@@ -53,6 +55,14 @@ const Blessings = ({ categoriesWithItems }) => {
     // // eslint-disable-next-line react-hooks/exhaustive-deps
     // }, [chainId, account])
 
+    useEffect(() => {
+        fetch('/api/items')
+          .then((res) => res.json())
+          .then((data) => {
+            setCategoriesWithItems(data)
+          })
+      }, [])
+
     return (
         <Box>
         {categoriesWithItems?.map((item) => (
@@ -79,20 +89,6 @@ const Blessings = ({ categoriesWithItems }) => {
         
         </Box>
     )
-}
-
-
-Blessings.getInitialProps = async (context) => {
-    const { req, res } = context;
-    res.setHeader(
-        'Cache-Control',
-        'public, s-maxage=10, stale-while-revalidate=59'
-      )
-    const proto = req.connection.encrypted ? "https" : "http";
-    const res1 = await fetch(`${proto}://${req.headers.host}/api/items`)
-    const categoriesWithItems = await res1.json()
-    
-    return { props: { categoriesWithItems } }
 }
 
 export default Blessings
