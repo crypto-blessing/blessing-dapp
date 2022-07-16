@@ -16,19 +16,6 @@ import { useEffect, useState } from "react"
 import { Block } from '@mui/icons-material'
 import { Divider, Slider } from '@mui/material'
 
-export async function getServerSideProps(context) {
-    const { req, res } = context;
-    res.setHeader(
-        'Cache-Control',
-        'public, s-maxage=10, stale-while-revalidate=59'
-      )
-    const proto = req.connection.encrypted ? "https" : "http";
-    const res1 = await fetch(`${proto}://${req.headers.host}/api/items`)
-    const categoriesWithItems = await res1.json()
-    
-    return { props: { categoriesWithItems } }
-}
-
 const Blessings = ({ categoriesWithItems }) => {
 
     const { active, account, chainId } = useWeb3React()
@@ -92,6 +79,20 @@ const Blessings = ({ categoriesWithItems }) => {
         
         </Box>
     )
+}
+
+
+Blessings.getInitialProps = async (context) => {
+    const { req, res } = context;
+    res.setHeader(
+        'Cache-Control',
+        'public, s-maxage=10, stale-while-revalidate=59'
+      )
+    const proto = req.connection.encrypted ? "https" : "http";
+    const res1 = await fetch(`${proto}://${req.headers.host}/api/items`)
+    const categoriesWithItems = await res1.json()
+    
+    return { props: { categoriesWithItems } }
 }
 
 export default Blessings
