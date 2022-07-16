@@ -156,6 +156,10 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
 
     mapping(address => ClaimPubkeyStatus[]) internal blessingPubkeyStatusMapping;
 
+    function getBlessingPubkeyStatus(address _blessingID) public view returns (ClaimPubkeyStatus[] memory) {
+        return blessingPubkeyStatusMapping[_blessingID];
+    }
+
     function sendBlessing(
         string memory image,
         address blessingID,

@@ -172,7 +172,7 @@ const AppBarContent = props => {
       {/** System maintenance in progress */}
 
       <Dialog
-        open={chainId != 97 && chainId != 1337}
+        open={chainId != 97 && chainId != 1337 && chainId != undefined}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >

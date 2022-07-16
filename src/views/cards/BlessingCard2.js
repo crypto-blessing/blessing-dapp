@@ -130,7 +130,7 @@ const BlessingCard2 = (props) => {
   const handleBlessingCaption = (tokenAmount, claimQuantity, claimType) => {
     let payCaption = '', claimCaption = '';
     if (tokenAmount > 0 && claimQuantity > 0) {
-      let totalPay = (claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount)
+      let totalPay = (claimQuantity * props.blessing.price) + parseFloat(tokenAmount)
       refreshBUSDApprove(totalPay)
       payCaption = `You will pay ${totalPay} BUSD. `
     } else {
@@ -167,7 +167,7 @@ const BlessingCard2 = (props) => {
   }
 
   const checkFormValidate = () => {
-    if (tokenAmount <= 0 || BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
+    if (tokenAmount <= 0 || BigInt((claimQuantity * props.blessing.price + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
       setAlertMsg('You have insufficient BUSD balance.')
       setAlertOpen(true);
 
@@ -199,7 +199,7 @@ const BlessingCard2 = (props) => {
     try {
       const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
       await tx.wait()
-      refreshBUSDApprove((claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount))
+      refreshBUSDApprove((claimQuantity * props.blessing.price) + parseFloat(tokenAmount))
       setApproving(false)
       setLoading(true)
     } catch (e) {
@@ -207,6 +207,27 @@ const BlessingCard2 = (props) => {
       setApproving(false)
     }
     
+  }
+
+  async function storeKeys(blessingKeypair, claimKeys) {
+    fetch('/api/blessing-sended', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        blessing: {
+          blessing_id: blessingKeypair.address,
+          private_key: blessingKeypair.privateKey
+        },
+        claimKeys: claimKeys
+      }),
+    }).then(res => {
+      console.log(res)
+    } ).catch(err => {
+      console.log(err)
+
+    })
   }
 
   async function submitSendBlessing() {
@@ -219,16 +240,28 @@ const BlessingCard2 = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
     const blessingKeypair = ethers.Wallet.createRandom();
-
-    // const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
     try {
-      // await busdContract.approve(cryptoBlessingAdreess(chainId), BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18));
-      
+      let pubkeys = []
+      let claimKeys = []
+
+      // claim keys gen
+      for (let i = 0; i < claimQuantity; i++) {
+        const claimKeyPair = ethers.Wallet.createRandom();
+        pubkeys.push(claimKeyPair.address)
+        claimKeys.push({
+          pubkey: claimKeyPair.address,
+          private_key: claimKeyPair.privateKey
+        })
+      }
+
+      await storeKeys(blessingKeypair, claimKeys)
+
       const sendBlessingTx = await cbContract.sendBlessing(
         props.blessing.image, blessingKeypair.address, 
         BigInt(tokenAmount * 10 ** 18), 
         claimQuantity,
-        claimType
+        claimType,
+        pubkeys
       )
       await sendBlessingTx.wait();
       setSending(false)
@@ -239,6 +272,7 @@ const BlessingCard2 = (props) => {
       fetchBUSDAmount()
       setLoading(true)
     } catch (e) {
+      console.log(e)
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
       setAlertOpen(true);
       setSending(false)
@@ -317,7 +351,7 @@ const BlessingCard2 = (props) => {
 
   return (
     <Card>
-      <CardMedia sx={{ height: '10rem' }} image={'/images/blessings/items/' + props.blessing.image} />
+      <CardMedia sx={{ height: '12rem' }} image={'/images/blessings/items/' + props.blessing.image} />
       <CardContent>
         <Box
           sx={{
@@ -327,16 +361,16 @@ const BlessingCard2 = (props) => {
             justifyContent: 'space-between'
           }}
         >
-          <Typography variant='caption'>恭喜发才</Typography>
-          <Chip size="small" variant="outlined" color="warning" label={ethers.utils.formatEther(props.blessing.price).toString()} />
+          <Typography variant='caption'>{props.blessing.title}</Typography>
+          <Chip size="small" variant="outlined" color="warning" label={props.blessing.price} />
         </Box>
       </CardContent>
       {active ?
-        <Button onClick={handleOpen} variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <Button size="small" onClick={handleOpen} variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           Send Blessing
         </Button>
       :
-        <Button disabled variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <Button size="small" disabled variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           Connect Wallet
         </Button>
       }
@@ -381,7 +415,7 @@ const BlessingCard2 = (props) => {
                 </CardContent>
                 <CardActions className='card-action-dense'>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                  <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='warning'>{ethers.utils.formatEther(props.blessing.price).toString()} BUSD</Button>
+                  <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='warning'>{props.blessing.price} BUSD</Button>
                   </Box>
                 </CardActions>
               </Grid>
@@ -406,7 +440,9 @@ const BlessingCard2 = (props) => {
                         )
                       }}
                     />
+                    <Typography variant='caption'>help? <Link target='_blank' href='https://pancakeswap.finance/swap?outputCurrency=0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'>PancakeSwap</Link> for BUSD</Typography>
                   </Grid>
+                  
                   <Grid item xs={12}>
                     <TextField
                       onChange={handleClaimQuantityChange}

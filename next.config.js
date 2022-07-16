@@ -21,5 +21,13 @@ module.exports = {
     config.plugins.push(new webpack.EnvironmentPlugin(myEnv))
 
     return config
-  }
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "http://localhost:3001/api/:path*",
+      },
+    ]
+  },
 }

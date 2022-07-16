@@ -103,7 +103,20 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }
 }))
 
-const ClaimPage = () => {
+export async function getServerSideProps(context) {
+  const { req, res, query } = context;
+  res.setHeader(
+      'Cache-Control',
+      'public, s-maxage=10, stale-while-revalidate=59'
+    )
+  const proto = req.connection.encrypted ? "https" : "http";
+  const res1 = await fetch(`${proto}://${req.headers.host}/api/items/fetchOneItem?blessing_id=${decode(query.blessing)}`)
+  const blessingInDB = await res1.json()
+
+  return { props: { blessingInDB } }
+}
+
+const ClaimPage = ({blessingInDB}) => {
   const [sender, setSender] = useState('')
   const [blessingID, setBlessingID] = useState('')
   const [claimKey, setClaimKey] = useState('')
@@ -120,7 +133,7 @@ const ClaimPage = () => {
       if (localStorage.getItem('my_claimed_' + decode(blessing)) === '1' || localStorage.getItem('my_blessing_claim_key_' + decode(blessing)) != undefined) {
         setAlreadyClaimed(true)
       }
-   
+
   }, [router.query])
   
 
@@ -214,17 +227,21 @@ const ClaimPage = () => {
     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
     
     try {
-      // const signature = await blessingKeypair.signMessage(MESSAGE)
+
+      const blessingPubkeyStatus = await cbContract.getBlessingPubkeyStatus(blessingSended.blessingID)
+      const unusedKeys = blessingPubkeyStatus.filter(key => !key.used)
+      const unusedPrivateKeyRes = await fetch(`/api/blessing-sended/private_key?blessing_id=${blessingSended.blessingID}&private_key=${claimKey}&unusedPubkey=${unusedKeys[Math.floor(Math.random() * unusedKeys.length)].pubkey}`)
+      const unusedPrivateKeyJson = await unusedPrivateKeyRes.json()
+
       const web3 = new Web3(window.ethereum);
       const MESSAGE = web3.utils.sha3('CryptoBlessing');
-      const signature = await web3.eth.accounts.sign(MESSAGE, claimKey);
+      const signature = await web3.eth.accounts.sign(MESSAGE, unusedPrivateKeyJson.data.private_key);
 
       const claimTx = await cbContract.claimBlessing(
         sender, 
         blessingSended.blessingID, 
         toEthSignedMessageHash(web3, MESSAGE),
-        signature.signature,
-        account
+        signature.signature
       )
       await claimTx.wait();
       featchAllInfoOfBlessing(new ethers.providers.Web3Provider(window.ethereum))
@@ -234,6 +251,7 @@ const ClaimPage = () => {
       setAlreadyClaimed(true)
       setLoading(true);
     } catch (e) {
+      console.log(e)
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
       setAlertMsg(e.MESSAGE)
       setAlertOpen(true);
@@ -307,17 +325,17 @@ const ClaimPage = () => {
               sx={{ width: 150, height: 150, marginBottom: 2.25, color: 'common.white', backgroundColor: 'primary.main',
               '-webkit-box-shadow': '0px 0px 20px 0px rgba(146,90,248,0.75)', filter: 'drop-shadow(0px 0px 20px 0px rgba(146,90,248,0.75))', margin: '15px' }}
             >
-              <img width={150} alt='CryptoBlessing' src={'/images/blessings/items/' + blessing.image} />
+              <img width={150} alt='CryptoBlessing' src={'/images/blessings/items/' + blessingInDB.image} />
             </Avatar>
             <Typography variant='h6' sx={{ marginBottom: 2.75 }}>
-            {getBlessingTitle(blessing.description)}
+            {blessingInDB.title}
             </Typography>
             <Typography variant='body2' sx={{ marginBottom: 6 }}>
-            {getBlessingDesc(blessing.description)}
+            {blessingInDB.description}
             </Typography>
             <Stack direction="row" spacing={1}>
               <Chip variant="outlined" color="warning" label={claimedAmount + '/' + (blessingSended && blessingSended.tokenAmount ? ethers.utils.formatEther(blessingSended.tokenAmount) : 0) + ' BUSD'} icon={<BUSD_ICON />} />
-              <Chip variant="outlined" color="primary" label={claimList.length + '/' + (blessingSended?.claimQuantity?.toString()) + ' Blessings'} icon={<AccountCircleIcon />} />
+              <Chip variant="outlined" color="primary" label={claimList.length + '/' + (blessingSended && blessingSended.claimQuantity ? blessingSended?.claimQuantity?.toString() : 0) + ' Blessings'} icon={<AccountCircleIcon />} />
             </Stack>
           </CardContent>
           <Divider sx={{ my: 3 }}>sended at {blessingSended.sendTimestamp ? toLocaleDateFromBigInt(blessingSended.sendTimestamp) : '1970'}  by {sender ? simpleShow(sender) : 'CryptoBlessing'}</Divider>
@@ -351,7 +369,7 @@ const ClaimPage = () => {
                         <Stack direction="row" spacing={1}>
                           <Chip variant="outlined" color="warning" label={parseFloat(row.amount).toFixed(2)} icon={<BUSD_ICON />} />
                           <Chip
-                            avatar={<Avatar alt="CryptoBlessing" src={'/images/blessings/items/' + blessing.image} />}
+                            avatar={<Avatar alt="CryptoBlessing" src={'/images/blessings/items/' + blessingInDB.image} />}
                             label="1"
                             variant="outlined"
                           />
