@@ -179,7 +179,7 @@ const ClaimPage = () => {
       } catch (err) {
         console.log("Error: ", err)
 
-        window.location.replace("/pages/404")
+        // window.location.replace("/pages/404")
       }
     }
   }
