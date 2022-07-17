@@ -1,66 +1,73 @@
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import Box from '@mui/material/Box'
+import Chip from '@mui/material/Chip';
+import TodayIcon from '@mui/icons-material/Today';
+
 
 // ** Demo Components Imports
 import BlessingCard from 'src/views/cards/BlessingCard'
+import Divider from '@mui/material/Divider'
+import ProductHeroLayout from 'src/layouts/ProductHeroLayout'
 
-import { ethers } from 'ethers'
-import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
-import { useWeb3React } from "@web3-react/core"
-import {cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
+import {getCurrentDate} from 'src/@core/utils/date'
 
 import { useEffect, useState } from "react"
 
-const Blessings = () => {
+const BlessingDay = () => {
 
-    const { active, account, chainId } = useWeb3React()
-    const [blessings, setBlessings] = useState([])
+    const [blessingDay, setBlessingDay] = useState({})
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    async function fetchBlessings() {
-        if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
-            const provider = new ethers.providers.Web3Provider(window.ethereum)
-            const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
-            try {
-                setBlessings(await cbContract.getAllBlessings())
-            } catch (err) {
-                setBlessings([{
-                    image: 'gongxifacai.gif',
-                    description: 'gong xi fa cai#In every Chinese New Year, the greetings among Chinese',
-                    price: BigInt(0.1 * 10 ** 18),
-                    owner: '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097',
-                }])
-                console.log("Error: ", err)
-            }
-            
-        } else {
-            setBlessings([{
-                image: 'gongxifacai.gif',
-                description: 'gong xi fa cai#In every Chinese New Year, the greetings among Chinese',
-                price: BigInt(0.1 * 10 ** 18),
-                owner: '0xdF3e18d64BC6A983f673Ab319CCaE4f1a57C7097',
-            }])
-        }
-    }
 
     useEffect(() => {
-        fetchBlessings()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [chainId, account])
+        fetch(`/api/blessing-day?day=${getCurrentDate()}`)
+          .then((res) => res.json())
+          .then((data) => {
+            setBlessingDay(data)
+          })
+      }, [])
 
     return (
-        <Grid container spacing={6}>
-            <Grid item xs={12} sx={{ paddingBottom: 4 }}>
-                <Typography variant='h5'>Blessing Market</Typography>
+        <Box>
+            <ProductHeroLayout
+            sxBackground={{
+                backgroundImage: `url(${'/images/banners/' + blessingDay.banner})`,
+                backgroundColor: '#7fc7d9', // Average color of the background image.
+                backgroundPosition: 'center',
+            }}
+            >
+            {/* Increase the network loading priority of the background image. */}
+            <img
+                style={{ display: 'none' }}
+                src={'/images/banners/' + blessingDay.banner}
+                alt="increase priority"
+            />
+            <Typography color="inherit" align="center" variant="h2" marked="center">
+                {blessingDay.title}
+            </Typography>
+            <Typography
+                color="inherit"
+                align="center"
+                variant="h5"
+                sx={{ mb: 4, mt: { sx: 4, sm: 10 } }}
+            >
+                {blessingDay.description}
+            </Typography>
+            <Chip icon={<TodayIcon />} label={blessingDay.day} color='primary'/>
+            </ProductHeroLayout>
+            <Divider />
+            <Grid container spacing={6}>
+                {blessingDay.items?.map((blessing) => (
+                    <Grid key={blessing.image} item xs={12} sm={6} md={4}>
+                        <BlessingCard blessing={blessing} />
+                    </Grid>
+                ))}   
             </Grid>
-            {blessings?.map((blessing) => (
-                <Grid key={blessing.image} item xs={12} sm={6} md={4}>
-                    <BlessingCard blessing={blessing} />
-                </Grid>
-            ))}   
-        </Grid>
+        </Box>
+        
     )
 }
 
-export default Blessings
+export default BlessingDay

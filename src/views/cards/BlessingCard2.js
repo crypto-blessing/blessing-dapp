@@ -34,8 +34,6 @@ import { green } from '@mui/material/colors';
 import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-import { getBlessingTitle, getBlessingDesc } from 'src/@core/utils/blessing'
-
 import {getProviderUrl, simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
 import {encode} from 'src/@core/utils/cypher'
 
@@ -173,8 +171,8 @@ const BlessingCard2 = (props) => {
 
       return false
     }
-    if (claimQuantity <= 0 || claimQuantity > 1000) {
-      setAlertMsg('You only have up to 1,000 friends to collect your BUSD')
+    if (claimQuantity <= 0 || claimQuantity > 13) {
+      setAlertMsg('You only have up to 13 friends to collect your BUSD')
       setAlertOpen(true);
 
       return false
@@ -216,6 +214,7 @@ const BlessingCard2 = (props) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        image: props.blessing.image,
         blessing: {
           blessing_id: blessingKeypair.address,
           private_key: blessingKeypair.privateKey
@@ -284,7 +283,7 @@ const BlessingCard2 = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getSigner().getAddress().then(async (address) => {
       const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
-      navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(props.blessing.description)} | ${getBlessingDesc(props.blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(address)}&blessing=${encode(blessingKeypairAddress)}&key=${encode(privateKey)}`)
+      navigator.clipboard.writeText(`[CryptoBlessing] ${props.blessing.title} | ${props.blessing.description}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(address)}&blessing=${encode(blessingKeypairAddress)}&key=${encode(privateKey)}`)
     })
   }
 
@@ -319,7 +318,7 @@ const BlessingCard2 = (props) => {
   useEffect(() => {
     fetchBUSDAmount()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId])
+  }, [chainId, account])
 
 
   // useEffect(() => {
@@ -401,10 +400,10 @@ const BlessingCard2 = (props) => {
               >
                 <CardContent>
                   <Typography variant='h6' sx={{ marginBottom: 2 }}>
-                  {getBlessingTitle(props.blessing.description)}
+                  {props.blessing.title}
                   </Typography>
                   <Typography variant='body2' sx={{ marginBottom: 3.5 }}>
-                  {getBlessingDesc(props.blessing.description)}
+                  {props.blessing.description}
                   </Typography>
                   <Typography sx={{ fontWeight: 500, marginBottom: 3 }}>
                     Designer:{' '}

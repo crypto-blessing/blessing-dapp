@@ -34,8 +34,6 @@ import { green } from '@mui/material/colors';
 import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-import { getBlessingTitle, getBlessingDesc } from 'src/@core/utils/blessing'
-
 import {getProviderUrl, simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
 import {encode} from 'src/@core/utils/cypher'
 
@@ -130,7 +128,7 @@ const BlessingCard = (props) => {
   const handleBlessingCaption = (tokenAmount, claimQuantity, claimType) => {
     let payCaption = '', claimCaption = '';
     if (tokenAmount > 0 && claimQuantity > 0) {
-      let totalPay = (claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount)
+      let totalPay = (claimQuantity * props.blessing.price) + parseFloat(tokenAmount)
       refreshBUSDApprove(totalPay)
       payCaption = `You will pay ${totalPay} BUSD. `
     } else {
@@ -167,14 +165,14 @@ const BlessingCard = (props) => {
   }
 
   const checkFormValidate = () => {
-    if (tokenAmount <= 0 || BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
+    if (tokenAmount <= 0 || BigInt((claimQuantity * props.blessing.price + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
       setAlertMsg('You have insufficient BUSD balance.')
       setAlertOpen(true);
 
       return false
     }
-    if (claimQuantity <= 0 || claimQuantity > 1000) {
-      setAlertMsg('You only have up to 1,000 friends to collect your BUSD')
+    if (claimQuantity <= 0 || claimQuantity > 13) {
+      setAlertMsg('You only have up to 13 friends to collect your BUSD')
       setAlertOpen(true);
 
       return false
@@ -199,7 +197,7 @@ const BlessingCard = (props) => {
     try {
       const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
       await tx.wait()
-      refreshBUSDApprove((claimQuantity * ethers.utils.formatEther(props.blessing.price)) + parseFloat(tokenAmount))
+      refreshBUSDApprove((claimQuantity * props.blessing.price) + parseFloat(tokenAmount))
       setApproving(false)
       setLoading(true)
     } catch (e) {
@@ -207,6 +205,28 @@ const BlessingCard = (props) => {
       setApproving(false)
     }
     
+  }
+
+  async function storeKeys(blessingKeypair, claimKeys) {
+    fetch('/api/blessing-sended', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        image: props.blessing.image,
+        blessing: {
+          blessing_id: blessingKeypair.address,
+          private_key: blessingKeypair.privateKey
+        },
+        claimKeys: claimKeys
+      }),
+    }).then(res => {
+      console.log(res)
+    } ).catch(err => {
+      console.log(err)
+
+    })
   }
 
   async function submitSendBlessing() {
@@ -219,16 +239,28 @@ const BlessingCard = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider.getSigner())
     const blessingKeypair = ethers.Wallet.createRandom();
-
-    // const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
     try {
-      // await busdContract.approve(cryptoBlessingAdreess(chainId), BigInt((claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)) * 10 ** 18));
-      
+      let pubkeys = []
+      let claimKeys = []
+
+      // claim keys gen
+      for (let i = 0; i < claimQuantity; i++) {
+        const claimKeyPair = ethers.Wallet.createRandom();
+        pubkeys.push(claimKeyPair.address)
+        claimKeys.push({
+          pubkey: claimKeyPair.address,
+          private_key: claimKeyPair.privateKey
+        })
+      }
+
+      await storeKeys(blessingKeypair, claimKeys)
+
       const sendBlessingTx = await cbContract.sendBlessing(
         props.blessing.image, blessingKeypair.address, 
         BigInt(tokenAmount * 10 ** 18), 
         claimQuantity,
-        claimType
+        claimType,
+        pubkeys
       )
       await sendBlessingTx.wait();
       setSending(false)
@@ -239,6 +271,7 @@ const BlessingCard = (props) => {
       fetchBUSDAmount()
       setLoading(true)
     } catch (e) {
+      console.log(e)
       setAlertMsg('Something went wrong. Please contact admin in telegram.')
       setAlertOpen(true);
       setSending(false)
@@ -250,7 +283,7 @@ const BlessingCard = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getSigner().getAddress().then(async (address) => {
       const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
-      navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(props.blessing.description)} | ${getBlessingDesc(props.blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(address)}&blessing=${encode(blessingKeypairAddress)}&key=${encode(privateKey)}`)
+      navigator.clipboard.writeText(`[CryptoBlessing] ${props.blessing.title} | ${props.blessing.description}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(address)}&blessing=${encode(blessingKeypairAddress)}&key=${encode(privateKey)}`)
     })
   }
 
@@ -285,74 +318,33 @@ const BlessingCard = (props) => {
   useEffect(() => {
     fetchBUSDAmount()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId])
-
-
-  // useEffect(() => {
-  //   if (chainId) {
-  //     const provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId))
-  //     const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider)
-  //     busdContract.on('Approval', (owner, spender, value) => {
-  //       if (owner === account && spender === cryptoBlessingAdreess(chainId)) {
-  //         console.log('Approved')
-  //         const totalBUSDArppoveAmount = claimQuantity * ethers.utils.formatEther(props.blessing.price) + parseFloat(tokenAmount)
-  //         setNeedApproveBUSDAmount(BigInt((totalBUSDArppoveAmount - ethers.utils.formatEther(value)) * 10 ** 18))
-  //         setLoading(false)
-  //       }
-  //     })
-
-  //     const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider)
-  //     cbContract.on('senderSendCompleted', (sender, ret_blessingID) => {
-  //       console.log('senderSendCompleted', sender, ret_blessingID)
-  //       if (account == sender) {
-  //         setSending(false)
-  //         setOpen(false)
-  //         setSendSuccessOpen(true)
-  //         setLoading(true)
-  //       }
-  //     })
-
-  //   }
-  // }, [chainId, account, claimQuantity, props.blessing.price, tokenAmount])
+  }, [chainId, account])
 
   return (
     <Card>
-      <CardMedia sx={{ height: '26rem' }} image={'/images/blessings/items/' + props.blessing.image} />
+      <CardMedia sx={{ height: '24rem' }} image={'/images/blessings/items/' + props.blessing.image} />
       <CardContent>
-        <Typography variant='h6' sx={{ marginBottom: 2 }}>
-          {getBlessingTitle(props.blessing.description)}
-        </Typography>
-        <Typography variant='body2'>
-          {getBlessingDesc(props.blessing.description, true)}
-        </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}
+        >
+          <Typography variant='caption'>{props.blessing.description}</Typography>
+          <Chip size="small" variant="outlined" color="warning" label={props.blessing.price} />
+        </Box>
       </CardContent>
       {active ?
-        <Button onClick={handleOpen} variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <Button size="small" onClick={handleOpen} variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           Send Blessing
         </Button>
       :
-        <Button disabled variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <Button size="small" disabled variant='contained' sx={{ py: 2.5, width: '100%', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           Connect Wallet
         </Button>
       }
-      
-
-      <CardContent>
-        <Box
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}
-          >
-            <Box sx={{ mr: 2, mb: 1, display: 'flex', flexDirection: 'column' }}>
-              <Typography variant='h6'>{simpleShow(props.blessing.owner)}</Typography>
-              <Typography variant='caption'>Designer</Typography>
-            </Box>
-            <Chip variant="outlined" color="warning" label={ethers.utils.formatEther(props.blessing.price).toString() + 'BUSD'} icon={<BUSD_ICON />} />
-          </Box>
-      </CardContent>
 
       <Modal
         open={open}
@@ -380,10 +372,10 @@ const BlessingCard = (props) => {
               >
                 <CardContent>
                   <Typography variant='h6' sx={{ marginBottom: 2 }}>
-                  {getBlessingTitle(props.blessing.description)}
+                  {props.blessing.title}
                   </Typography>
                   <Typography variant='body2' sx={{ marginBottom: 3.5 }}>
-                  {getBlessingDesc(props.blessing.description)}
+                  {props.blessing.description}
                   </Typography>
                   <Typography sx={{ fontWeight: 500, marginBottom: 3 }}>
                     Designer:{' '}
@@ -394,7 +386,7 @@ const BlessingCard = (props) => {
                 </CardContent>
                 <CardActions className='card-action-dense'>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                  <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='error'>{ethers.utils.formatEther(props.blessing.price).toString()} BUSD</Button>
+                  <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='warning'>{props.blessing.price} BUSD</Button>
                   </Box>
                 </CardActions>
               </Grid>
@@ -419,7 +411,9 @@ const BlessingCard = (props) => {
                         )
                       }}
                     />
+                    <Typography variant='caption'>help? <Link target='_blank' href='https://pancakeswap.finance/swap?outputCurrency=0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'>PancakeSwap</Link> for BUSD</Typography>
                   </Grid>
+                  
                   <Grid item xs={12}>
                     <TextField
                       onChange={handleClaimQuantityChange}
