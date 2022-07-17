@@ -10,23 +10,23 @@ async function main() {
 
   const BUSD_ADDRESS = '0xe9e7cea3dedca5984780bafc599bd69add087d56';
 
-  const CBT_ADDRESS = '0x218B53FBCc4b128e2FF289d78079174d7E35CF4C'
+  const CBT_ADDRESS = '0xAB0444680DC75fBcF90aF8CC74D712d2AF4b4a3c'
 
-  const CBNFT_ADDRESS = '0x01ee790155677AAAE3060a09e32491d4C716f908'
+  const CBNFT_ADDRESS = '0xF32afD348cd33a0F51853febfbC7e82F3e2Faf9A'
 
 
   const CryptoBlessing = await hre.ethers.getContractFactory("CryptoBlessing");
-  const preCryptoBlessing = await CryptoBlessing.attach("0xc0CE659216A0EE7B0a9c309BdE2FB42376aD215a");
+  const preCryptoBlessing = await CryptoBlessing.attach("0x2B595C0F6350059988FdEF52f1995099F0382032");
 
   let newcryptoBlessing = await CryptoBlessing.deploy(BUSD_ADDRESS, CBT_ADDRESS, CBNFT_ADDRESS);
   await newcryptoBlessing.deployed();
 
   // pause old contract
-  const pauseTx = await preCryptoBlessing.pause();
-  await pauseTx.wait()
+  // const pauseTx = await preCryptoBlessing.pause();
+  // await pauseTx.wait()
 
   // upgrade
-  const upgradeTx = await preCryptoBlessing.upgradeToV2(newcryptoBlessing.address);
+  const upgradeTx = await preCryptoBlessing.upgradeToNextVersion(newcryptoBlessing.address);
   await upgradeTx.wait()
   console.log("CryptoBlessing core contract upgraded to:", newcryptoBlessing.address);
 }
