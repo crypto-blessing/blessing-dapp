@@ -350,7 +350,7 @@ const BlessingCard2 = (props) => {
 
   return (
     <Card>
-      <CardMedia sx={{ height: '12rem' }} image={'/images/blessings/items/' + props.blessing.image} />
+      <CardMedia sx={{ height: '13rem' }} image={'/images/blessings/items/' + props.blessing.image} />
       <CardContent>
         <Box
           sx={{
