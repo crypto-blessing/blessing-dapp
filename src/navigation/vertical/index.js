@@ -9,15 +9,16 @@ const navigation = () => {
   
   return [
     {
-      title: 'Blessing Day',
+      title: 'Blessings',
       icon: CurrencyBitcoinIcon,
       path: '/'
     },
-    {
-      title: 'Market',
-      icon: StorefrontIcon,
-      path: '/market'
-    },
+
+    // {
+    //   title: 'Market',
+    //   icon: StorefrontIcon,
+    //   path: '/market'
+    // },
     {
       sectionTitle: 'Mine'
     },

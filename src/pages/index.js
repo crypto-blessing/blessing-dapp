@@ -1,73 +1,54 @@
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
+import Link from '@mui/material/Link'
 import Box from '@mui/material/Box'
-import Chip from '@mui/material/Chip';
-import TodayIcon from '@mui/icons-material/Today';
-
 
 // ** Demo Components Imports
-import BlessingCard from 'src/views/cards/BlessingCard'
-import Divider from '@mui/material/Divider'
-import ProductHeroLayout from 'src/layouts/ProductHeroLayout'
+import BlessingCard2 from 'src/views/cards/BlessingCard2'
 
-import {getCurrentDate} from 'src/@core/utils/date'
 
 import { useEffect, useState } from "react"
+import { Divider, Slider } from '@mui/material'
 
-const BlessingDay = () => {
+const Market = () => {
 
-    const [blessingDay, setBlessingDay] = useState({})
-
+    const [categoriesWithItems, setCategoriesWithItems] = useState([])
 
     useEffect(() => {
-        fetch(`/api/blessing-day?day=${getCurrentDate()}`)
+        fetch('/api/items')
           .then((res) => res.json())
           .then((data) => {
-            setBlessingDay(data)
+            setCategoriesWithItems(data)
           })
       }, [])
 
     return (
         <Box>
-            <ProductHeroLayout
-            sxBackground={{
-                backgroundImage: `url(${'/images/banners/' + blessingDay.banner})`,
-                backgroundColor: '#7fc7d9', // Average color of the background image.
-                backgroundPosition: 'center',
-            }}
-            >
-            {/* Increase the network loading priority of the background image. */}
-            <img
-                style={{ display: 'none' }}
-                src={'/images/banners/' + blessingDay.banner}
-                alt="increase priority"
-            />
-            <Typography color="inherit" align="center" variant="h2" marked="center">
-                {blessingDay.title}
-            </Typography>
-            <Typography
-                color="inherit"
-                align="center"
-                variant="h5"
-                sx={{ mb: 4, mt: { sx: 4, sm: 10 } }}
-            >
-                {blessingDay.description}
-            </Typography>
-            <Chip icon={<TodayIcon />} label={blessingDay.day} color='primary'/>
-            </ProductHeroLayout>
-            <Divider />
-            <Grid container spacing={6}>
-                {blessingDay.items?.map((blessing) => (
-                    <Grid key={blessing.image} item xs={12} sm={6} md={4}>
-                        <BlessingCard blessing={blessing} />
+        {categoriesWithItems?.map((item) => (
+            <Box key={item.type}>
+                <Grid container spacing={6}>
+                    <Grid item xs={12}>
+                        <Typography variant='h5'>
+                        <Link href={'/category?category=' + item.type}>
+                            {item.type}
+                        </Link>
+                        </Typography>
+                        <Typography variant='body2' className='mui-ellipsis'>{item.description}</Typography>
                     </Grid>
-                ))}   
-            </Grid>
-        </Box>
+                    {item.items?.map((blessing) => (
+                        <Grid key={blessing.image} item xs={12} md={2}>
+                            <BlessingCard2 blessing={blessing} />
+                        </Grid>
+                    ))}
+                    
+                </Grid>
+                <Divider sx={{marginTop: 5}}/>
+            </Box>
+        ))}
         
+        </Box>
     )
 }
 
-export default BlessingDay
+export default Market
