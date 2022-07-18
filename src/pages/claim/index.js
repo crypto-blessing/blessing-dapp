@@ -207,7 +207,7 @@ const ClaimPage = () => {
   const copyClaimLink = () => {
     const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingSended.blessingID)
 
-    navigator.clipboard.writeText(`[CryptoBlessing] ${blessing.title} | ${blessing.description}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(sender)}&blessing=${encode(blessingSended.blessingID)}&key=${encode(privateKey)}`)
+    navigator.clipboard.writeText(`[CryptoBlessing] ${blessingInDB.title} | ${blessingInDB.description}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(sender)}&blessing=${encode(blessingSended.blessingID)}&key=${encode(privateKey)}`)
     handleAlertOpen('Claim Link Copied!')
   }
 
