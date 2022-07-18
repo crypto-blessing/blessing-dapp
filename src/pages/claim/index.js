@@ -317,7 +317,7 @@ const ClaimPage = () => {
               sx={{ width: 150, height: 150, marginBottom: 2.25, color: 'common.white', backgroundColor: 'primary.main',
               '-webkit-box-shadow': '0px 0px 20px 0px rgba(146,90,248,0.75)', filter: 'drop-shadow(0px 0px 20px 0px rgba(146,90,248,0.75))', margin: '15px' }}
             >
-              <img width={150} alt='CryptoBlessing' src={'/images/blessings/items/' + blessingInDB.image} />
+              <img width={150} alt='CryptoBlessing' src={blessingInDB.cdn_path + blessingInDB.image} />
             </Avatar>
             <Typography variant='h6' sx={{ marginBottom: 2.75 }}>
             {blessingInDB.title}
@@ -369,7 +369,7 @@ const ClaimPage = () => {
                         <Stack direction="row" spacing={1}>
                           <Chip variant="outlined" color="warning" label={parseFloat(row.amount).toFixed(2)} icon={<BUSD_ICON />} />
                           <Chip
-                            avatar={<Avatar alt="CryptoBlessing" src={'/images/blessings/items/' + blessingInDB.image} />}
+                            avatar={<Avatar alt="CryptoBlessing" src={blessingInDB.cdn_path + blessingInDB.image} />}
                             label="1"
                             variant="outlined"
                           />

@@ -350,7 +350,7 @@ const BlessingCard2 = (props) => {
 
   return (
     <Card>
-      <CardMedia sx={{ height: '13rem' }} image={'/images/blessings/items/' + props.blessing.image} />
+      <CardMedia sx={{ height: '13rem' }} image={props.blessing.cdn_path + props.blessing.image} />
       <CardContent>
         <Box
           sx={{
@@ -386,7 +386,7 @@ const BlessingCard2 = (props) => {
             <Grid container spacing={6}>
               <StyledGrid item md={5} xs={12}>
                 <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img width={137} alt='CryptoBlessing' src={'/images/blessings/items/' + props.blessing.image} />
+                  <img width={137} alt='CryptoBlessing' src={props.blessing.cdn_path + props.blessing.image} />
                 </CardContent>
               </StyledGrid>
               <Grid

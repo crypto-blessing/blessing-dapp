@@ -30,4 +30,7 @@ module.exports = {
       },
     ]
   },
+  env: {
+    vultr_cdn_path: 'https://ewr1.vultrobjects.com/crypto-blessing/items/',
+  }
 }

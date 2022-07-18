@@ -144,9 +144,9 @@ const Wallet = () => {
                         {CBNFTItems.map((item, index) => (
                             <ImageListItem key={item + '-' + index}>
                             <img
-                                src={`${'/images/blessings/items/' + item}?w=164&h=164&fit=crop&auto=format`}
-                                srcSet={`${'/images/blessings/items/' + item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                                alt={item.title}
+                                src={`${process.env.vultr_cdn_path + item}?w=164&h=164&fit=crop&auto=format`}
+                                srcSet={`${process.env.vultr_cdn_path + item}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                                alt={item}
                                 loading="lazy"
                             />
                             </ImageListItem>

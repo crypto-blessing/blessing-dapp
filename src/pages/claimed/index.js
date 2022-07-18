@@ -111,7 +111,7 @@ const BlessingClaimed = () => {
                                         {column.type === undefined ? value : ''}
                                         
                                         {column.type === 'image' ? 
-                                        <img width={80} alt='CryptoBlessing' src={'/images/blessings/items/' + value} />
+                                        <img width={80} alt='CryptoBlessing' src={process.env.vultr_cdn_path + value} />
                                         : ''}
 
                                         {column.type === 'amount' ?
