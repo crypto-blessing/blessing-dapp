@@ -45,7 +45,7 @@ import {decode, toEthSignedMessageHash} from 'src/@core/utils/cypher'
 import { ethers, utils } from 'ethers'
 import CryptoBlessing from 'src/artifacts/contracts/CryptoBlessing.sol/CryptoBlessing.json'
 import { useWeb3React } from "@web3-react/core"
-import { getBlessingTitle, getBlessingDesc, transClaimListFromWalletClaims } from 'src/@core/utils/blessing'
+import {transClaimListFromWalletClaims } from 'src/@core/utils/blessing'
 import {getProviderUrl, simpleShow, cryptoBlessingAdreess} from 'src/@core/components/wallet/address'
 import {toLocaleDateFromBigInt} from 'src/@core/utils/date'
 
@@ -207,7 +207,7 @@ const ClaimPage = () => {
   const copyClaimLink = () => {
     const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingSended.blessingID)
 
-    navigator.clipboard.writeText(`[CryptoBlessing] ${getBlessingTitle(blessing.description)} | ${getBlessingDesc(blessing.description)}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(sender)}&blessing=${encode(blessingSended.blessingID)}&key=${encode(privateKey)}`)
+    navigator.clipboard.writeText(`[CryptoBlessing] ${blessing.title} | ${blessing.description}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(sender)}&blessing=${encode(blessingSended.blessingID)}&key=${encode(privateKey)}`)
     handleAlertOpen('Claim Link Copied!')
   }
 
