@@ -331,7 +331,15 @@ const ClaimPage = () => {
             </Stack>
           </CardContent>
           <Divider sx={{ my: 3 }}>sended at {blessingSended.sendTimestamp ? toLocaleDateFromBigInt(blessingSended.sendTimestamp) : '1970'}  by {sender ? simpleShow(sender) : 'CryptoBlessing'}</Divider>
-          <CardContent>
+          
+          { !active ? 
+            <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+              <Typography  variant="button" display="block" gutterBottom color='error'>
+                You need to connect your wallet first!
+              </Typography>
+            </Box>
+            : 
+            <CardContent>
             {claimList.length > 0 ?
             <TableContainer component={Paper}>
               <Table sx={{ minWidth: 500 }} aria-label='customized table'>
@@ -384,7 +392,7 @@ const ClaimPage = () => {
               </Typography>
             </Box>
             }
-
+            
             {
               claimList.length > 0 && claimList.length == blessingSended.claimQuantity ?
               <Box sx={{ p: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
@@ -396,6 +404,7 @@ const ClaimPage = () => {
             }
             
           </CardContent>
+          }
 
           <CardActions
             sx={{
