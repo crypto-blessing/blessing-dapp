@@ -27,6 +27,8 @@ import Alert from '@mui/material/Alert';
 import Link from '@mui/material/Link';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+import IosShareIcon from '@mui/icons-material/IosShare';
 
 import { green } from '@mui/material/colors';
 
@@ -382,7 +384,13 @@ const BlessingCard2 = (props) => {
       >
         <Box sx={style}>
           <Card>
-            <CardHeader title='Send Blessing' titleTypographyProps={{ variant: 'h6' }} />
+            <CardHeader title='Send Blessing' 
+            action={
+              <IconButton target='_blank' href={'/send?blessing=' + encode(props.blessing.image)} aria-label="Send This Blessing">
+                <IosShareIcon />
+              </IconButton>
+            }
+            titleTypographyProps={{ variant: 'h6' }} />
             <Grid container spacing={6}>
               <StyledGrid item md={5} xs={12}>
                 <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

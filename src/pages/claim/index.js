@@ -120,11 +120,14 @@ const ClaimPage = () => {
       if (localStorage.getItem('my_claimed_' + decode(blessing)) === '1' || localStorage.getItem('my_blessing_claim_key_' + decode(blessing)) != undefined) {
         setAlreadyClaimed(true)
       }
-      fetch(`/api/items/fetchOneItem?blessing_id=${decode(blessing)}`)
+      if (blessing) {
+        fetch(`/api/items/fetchOneItem?blessing_id=${decode(blessing)}`)
           .then((res) => res.json())
           .then((data) => {
             setBlessingInDB(data)
           })
+      }
+      
   }, [router.query])
   
 
