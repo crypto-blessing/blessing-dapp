@@ -1,5 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
+require('@nomiclabs/hardhat-ethers');
+require("@nomiclabs/hardhat-etherscan");
 require('dotenv').config({path:__dirname+'/.env'})
 
 
@@ -39,5 +41,8 @@ module.exports = {
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
     },
+  },
+  etherscan: {
+    apiKey: ''
   },
 };
