@@ -23,7 +23,7 @@ const FooterContent = () => {
         <Link href='/'>
           CryptoBlessing
         </Link>
-        <Button href="https://cryptoblessing.gitbook.io/welcome-to-cryptoblessing/" target='_blank'>White Paper</Button>
+        <Button href="https://whitepaper.cryptoblessing.app/" target='_blank'>White Paper</Button>
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Link target='_blank' href='https://twitter.com/cryptoblessing4'>
