@@ -252,15 +252,12 @@ describe("CryptoBlessing", function () {
         await deployCryptoBlessing();
 
         let ownerCB = await cbToken.balanceOf(owner.address);
-        expect(ownerCB).to.equal(BigInt(79 * 100000000));
+        expect(ethers.utils.formatEther(ownerCB)).to.equal('100000000.0');
 
         // transfer 7.9 billion CB token to the contract
-        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
+        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(100000 * 10 ** 18));
         await transferCBTx.wait();
-        let  blessingCB = await cbToken.balanceOf(cryptoBlessing.address);
-        expect(blessingCB).to.equal(BigInt(79 * 100000000));
         ownerCB = await cbToken.balanceOf(owner.address);
-        expect(ownerCB).to.equal(BigInt(0));
 
         // transfer the owner of CBNFT to the owner of CryptoBlessing.
         await cbNFT.transferOwnership(cryptoBlessing.address);
@@ -358,15 +355,11 @@ describe("CryptoBlessing", function () {
         await deployCryptoBlessing();
 
         let ownerCB = await cbToken.balanceOf(owner.address);
-        expect(ownerCB).to.equal(BigInt(79 * 100000000));
 
         // transfer 7.9 billion CB token to the contract
         const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
         await transferCBTx.wait();
-        let  blessingCB = await cbToken.balanceOf(cryptoBlessing.address);
-        expect(blessingCB).to.equal(BigInt(79 * 100000000));
         ownerCB = await cbToken.balanceOf(owner.address);
-        expect(ownerCB).to.equal(BigInt(0));
 
         // transfer the owner of CBNFT to the owner of CryptoBlessing.
         await cbNFT.transferOwnership(cryptoBlessing.address);
@@ -531,15 +524,11 @@ describe("CryptoBlessing", function () {
         await deployCryptoBlessing();
 
         let ownerCB = await cbToken.balanceOf(owner.address);
-        expect(ownerCB).to.equal(BigInt(79 * 100000000));
 
         // transfer 7.9 billion CB token to the contract
         const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(79 * 100000000));
         await transferCBTx.wait();
-        let  blessingCB = await cbToken.balanceOf(cryptoBlessing.address);
-        expect(blessingCB).to.equal(BigInt(79 * 100000000));
         ownerCB = await cbToken.balanceOf(owner.address);
-        expect(ownerCB).to.equal(BigInt(0));
 
         // transfer the owner of CBNFT to the owner of CryptoBlessing.
         await cbNFT.transferOwnership(cryptoBlessing.address);
@@ -577,7 +566,7 @@ describe("CryptoBlessing", function () {
             "blessing image", blessingKeypair.address, 
             sendBUSDAmount, 
             claimQuantity,
-            0, [blessingKeypair1.address, blessingKeypair2.address, blessingKeypair3.address, blessingKeypair4.address, blessingKeypair5.address],
+            1, [blessingKeypair1.address, blessingKeypair2.address, blessingKeypair3.address, blessingKeypair4.address, blessingKeypair5.address],
         );
         await sendBlessingTx.wait();
         console.log("start to sign the blessing, the private key is: ", blessingKeypair.privateKey);

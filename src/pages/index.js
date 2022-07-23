@@ -12,7 +12,7 @@ import { useEffect, useState } from "react"
 import { Divider, Slider } from '@mui/material'
 
 const Market = () => {
-
+    
     const [categoriesWithItems, setCategoriesWithItems] = useState([])
 
     useEffect(() => {
