@@ -46,9 +46,6 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         CLAIM_TAX_RATE = _CLAIM_TAX_RATE;
     }
     constructor(address _sendTokenAddress, address _cryptoBlessingTokenAddress, address _cryptoBlessingNFTAddress) payable {
-        console.log("Blessing is the most universal human expression of emotion, and we are NFTizing it!");
-        console.log("sendTokenAddress: %s", _sendTokenAddress);
-        console.log("CBTokenAddress: %s", _cryptoBlessingTokenAddress);
         sendTokenAddress = _sendTokenAddress;
         cryptoBlessingTokenAddress = _cryptoBlessingTokenAddress;
         cryptoBlessingNFTAddress = _cryptoBlessingNFTAddress;
@@ -75,7 +72,6 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         string[] memory images,
         Blessing[] memory blessings
     ) public onlyOwner {
-        console.log("start to add blessing to the pool!");
         for (uint256 i = 0; i < blessings.length; i ++) {
             blessingMapping[images[i]] = Blessing(blessings[i].price, blessings[i].owner, blessings[i].deleted, blessings[i].taxRate);
         }
@@ -227,9 +223,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         bytes32 hash,
         bytes memory signature
     ) payable public whenNotPaused nonReentrant returns (ClaimerBlessing memory){
-        console.log("start to claim blessing! sender:%s, blessingID:%s", sender, blessingID);
         require(_verify(hash, signature, blessingID), "Invalid signiture!");
-        console.log("signature is valid!");
         require(!Address.isContract(msg.sender), "You can not claim blessing from contract!");
         SenderBlessing[] memory senderBlessings = senderBlessingMapping[sender];
         require(senderBlessings.length > 0, "There is no blessing found on this sender!");
