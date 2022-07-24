@@ -147,7 +147,7 @@ const BlessingSendPage = () => {
         if (tokenAmount > 0 && claimQuantity > 0) {
         let totalPay = (claimQuantity * blessingInDB.price) + parseFloat(tokenAmount)
         refreshBUSDApprove(totalPay)
-        payCaption = `You will pay ${totalPay} BUSD. `
+        payCaption = `You will pay ${totalPay.toFixed(2)} BUSD. `
         } else {
         payCaption = ''
         }
