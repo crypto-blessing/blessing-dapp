@@ -60,7 +60,7 @@ const Wallet = () => {
 
     const [BNBAmount, setBNBAmount] = useState(0)
     const [BUSDAmount, setBUSDAmount] = useState(0)
-    const [CBTAmount, setCBAmount] = useState('')
+    const [CBTAmount, setCBTAmount] = useState(0)
     const [CBNFTItems, setCBNFTItems] = useState([])
 
     async function fetchERC20Amount() {
@@ -73,7 +73,7 @@ const Wallet = () => {
                 try {
                     setBNBAmount(amountShow(await provider.getBalance(address)))
                     setBUSDAmount(amountShow(await busdContract.balanceOf(address)))
-                    setCBAmount(await cbtContract.balanceOf(address) + '')
+                    setCBTAmount(amountShow(await cbtContract.balanceOf(address)))
                     setCBNFTItems(await cbNFTContract.getMyBlessingsURI())
                 } catch (err) {
                     console.log("Error: ", err)

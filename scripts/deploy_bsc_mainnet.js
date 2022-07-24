@@ -25,7 +25,7 @@ async function main() {
     await cryptoBlessing.deployed();
     console.log("CryptoBlessing core contract deployed to:", cryptoBlessing.address);
 
-    const transferCBTx = await cbToken.transfer(cryptoBlessing.address, BigInt(100000 * 10 ** 18));
+    const transferCBTx = await cbToken.transfer(cryptoBlessing.address, ethers.utils.parseEther("100000"));
     await transferCBTx.wait();
 
     // transfer the owner of CBNFT to the owner of CryptoBlessing.

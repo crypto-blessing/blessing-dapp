@@ -30,6 +30,28 @@ describe("CryptoBlessing", function () {
         await cbNFT.deployed();
     }
 
+    it("should deploy CryptoBlessing", async function () {
+        const [owner, anotherAddress] = await ethers.getSigners();
+        
+        // deploy contracts
+        await deployCBToken();
+        await deployCBNFT();
+        await deployBUSD();
+        await deployCryptoBlessing();
+
+        let ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(ethers.utils.parseEther('100000000'));
+
+        const transferCBTx = await cbToken.transfer(cryptoBlessing.address, ethers.utils.parseEther('10000000'));
+        await transferCBTx.wait();
+        ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(ethers.utils.parseEther('90000000'));
+        let burnTx = await cbToken.burn(ethers.utils.parseEther('10000000'));
+        await burnTx.wait();
+        ownerCB = await cbToken.balanceOf(owner.address);
+        expect(ownerCB).to.equal(ethers.utils.parseEther('80000000'));
+    })
+
     it("Should append or remove one blessing from the blessing pool?", async function () {
         const [owner, anotherAddress] = await ethers.getSigners();
 
@@ -332,7 +354,7 @@ describe("CryptoBlessing", function () {
         expect(blessingClaimingStatus.length).to.equal(1);
         console.log("blessingClaimingStatus: ", blessingClaimingStatus);
         let senderCB = await cbToken.balanceOf(sender.address);
-        expect(senderCB).to.equal(BigInt(100));
+        expect(senderCB).to.equal(BigInt(100 * 10 ** 18));
 
         // check the nft
         cbNFTCount = await cbNFT.balanceOf(claimer.address)

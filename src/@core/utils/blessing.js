@@ -74,7 +74,7 @@ export const transClaimListFromWalletClaims = (claims) => {
             claimer: simpleShow(claim.claimer),
             time: toLocaleDateFromBigInt(claim.claimTimestamp.toString()),
             amount: ethers.utils.formatEther(claim.distributedAmount),
-            CBTokenAwardToSenderAmount: claim.CBTokenAwardToSenderAmount.toString(),
+            CBTokenAwardToSenderAmount: ethers.utils.formatEther(claim.CBTokenAwardToSenderAmount),
         })
     })
 

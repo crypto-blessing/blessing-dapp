@@ -32,9 +32,9 @@ export const chainName = (chainId) => {
 export const cryptoBlessingAdreess = (chainId) => {
     switch (chainId) {
         case 56:
-            return '0x9886a0b41fc72f1f82b4eaeCEAbC6daf69Dd36b6';
+            return '0xD0eEbf2f4026F6Ff053bCD57267cdF0BFa55D5e6';
         case 97:
-            return '0x75C08434ea0D24831E85f1F782379021e356e8b2';
+            return '0x680F8833208B931aB5a71317EFB3eFCF83db9589';
         case 1337:
             return '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0';
         default:
@@ -59,9 +59,9 @@ export const BUSDContractAddress = (chainId) => {
 export const CBTContractAddress = (chainId) => {
     switch (chainId) {
         case 56:
-            return '0xAB0444680DC75fBcF90aF8CC74D712d2AF4b4a3c';
+            return '0x72a90beC83bD96E341E9f842C8290083cCAD9122';
         case 97:
-            return '0x517E749E50Ce7C78c44C0a3743462D6E82ba2c17';
+            return '0xa9b9Ff898964d37a5298ed951a65E81187c8b1fB';
         case 1337:
             return '0x610178dA211FEF7D417bC0e6FeD39F05609AD788';
         default:
@@ -72,9 +72,9 @@ export const CBTContractAddress = (chainId) => {
 export const CBNFTContractAddress = (chainId) => {
     switch (chainId) {
         case 56:
-            return '0xF32afD348cd33a0F51853febfbC7e82F3e2Faf9A';
+            return '0x4e3a8078555b71544482414a8aa93B3305b41F27';
         case 97:
-            return '0xd2129921C050e85882a0ab202A854300fb145596';
+            return '0xE811A6702EbAe54D67E47C996D186dBe8eAf477c';
         case 1337:
             return '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e';
         default:

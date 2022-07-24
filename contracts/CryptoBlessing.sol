@@ -28,6 +28,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
     address cryptoBlessingNFTAddress;
 
     uint256 CBTOKENAWARDRATIO = 5;
+    uint256 CBTOKENAWARDMAX = 100;
 
     uint256 CLAIM_TAX_RATE = 10; // 1000
 
@@ -37,8 +38,9 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
 
     event senderRevokeComplete(address sender, address blessingID);
 
-    function setCBTOKENAWARDRATIO(uint256 _CBTOKENAWARDRATIO) public onlyOwner {
+    function setCBTOKENAWARDRATIO(uint256 _CBTOKENAWARDRATIO, uint256 _CBTOKENAWARDMAX) public onlyOwner {
         CBTOKENAWARDRATIO = _CBTOKENAWARDRATIO;
+        CBTOKENAWARDMAX = _CBTOKENAWARDMAX;
     }
 
 
@@ -269,11 +271,10 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
 
         claimerBlessingMapping[msg.sender].push(claimerBlessing);
 
-        uint256 CBTokenAward = distributionAmount.div(10 ** 18).mul(CBTOKENAWARDRATIO);
-        if (CBTokenAward > 1000) {
-            CBTokenAward = 999;
+        uint256 CBTokenAward = distributionAmount.mul(CBTOKENAWARDRATIO);
+        if (CBTokenAward > CBTOKENAWARDMAX * 10 ** 18) {
+            CBTokenAward = (CBTOKENAWARDMAX-1) * 10 ** 18;
         }
-
         blessingClaimStatusMapping[blessingID].push(BlessingClaimStatus(
             msg.sender,
             block.timestamp,

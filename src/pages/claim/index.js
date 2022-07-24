@@ -380,7 +380,7 @@ const ClaimPage = () => {
                       </StyledTableCell>
                       <StyledTableCell align='right'>
                         <Tooltip disableFocusListener disableTouchListener title="The CBT tokens will reward to the sender of this blessing.">
-                          <Chip variant="outlined" color="primary" label={row.CBTokenAwardToSenderAmount} icon={<CBT_ICON />} />
+                          <Chip variant="outlined" color="primary" label={parseFloat(row.CBTokenAwardToSenderAmount).toFixed(2)} icon={<CBT_ICON />} />
                         </Tooltip>
                       </StyledTableCell>
                     </StyledTableRow>
