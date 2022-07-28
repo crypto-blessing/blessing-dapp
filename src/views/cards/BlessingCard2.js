@@ -318,9 +318,11 @@ const BlessingCard2 = (props) => {
   }
 
   useEffect(() => {
-    fetchBUSDAmount()
+    if (open) {
+      fetchBUSDAmount()
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, account])
+  }, [chainId, account, open])
 
 
   // useEffect(() => {
