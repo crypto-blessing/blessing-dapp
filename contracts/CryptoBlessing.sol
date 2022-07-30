@@ -63,6 +63,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         address owner;
         uint8 deleted;
         uint256 taxRate;
+        string ipfs;
     }
     mapping (string => Blessing) blessingMapping;
 
@@ -75,7 +76,7 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
         Blessing[] memory blessings
     ) public onlyOwner {
         for (uint256 i = 0; i < blessings.length; i ++) {
-            blessingMapping[images[i]] = Blessing(blessings[i].price, blessings[i].owner, blessings[i].deleted, blessings[i].taxRate);
+            blessingMapping[images[i]] = Blessing(blessings[i].price, blessings[i].owner, blessings[i].deleted, blessings[i].taxRate, blessings[i].ipfs);
         }
     }
 
@@ -292,8 +293,10 @@ contract CryptoBlessing is Ownable, Pausable, ReentrancyGuard {
             require(IERC20(cryptoBlessingTokenAddress).transfer(sender, CBTokenAward), "award CB tokens failed!");
         }
 
+        Blessing memory choosedBlessing = blessingMapping[choosedSenderBlessing.blessingImage];
+
         // award blessing NFT.
-        ICryptoBlessingNFT(cryptoBlessingNFTAddress).awardBlessingNFT(msg.sender, choosedSenderBlessing.blessingImage);
+        ICryptoBlessingNFT(cryptoBlessingNFTAddress).awardBlessingNFT(msg.sender, choosedBlessing.ipfs);
 
         emit claimerClaimComplete(sender, blessingID);
         return claimerBlessing;

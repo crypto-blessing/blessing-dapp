@@ -66,7 +66,7 @@ describe("CryptoBlessing", function () {
             price: BigInt(1 * 10 ** 18), 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx.wait();
@@ -78,7 +78,7 @@ describe("CryptoBlessing", function () {
             price: BigInt(9.9 * 10 ** 18), 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx2.wait();
@@ -91,7 +91,7 @@ describe("CryptoBlessing", function () {
             price: BigInt(1 * 10 ** 18), 
             owner: owner.address, 
             deleted: 1, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await removeBlessingTx.wait();
@@ -103,7 +103,7 @@ describe("CryptoBlessing", function () {
             price: BigInt(9.9 * 10 ** 18), 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await recoverBlessingTx.wait();
@@ -124,7 +124,7 @@ describe("CryptoBlessing", function () {
             price: BigInt(1 * 10 ** 18), 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx.wait();
@@ -134,13 +134,13 @@ describe("CryptoBlessing", function () {
             price: BigInt(1 * 10 ** 18), 
             owner: owner.address, 
             deleted: 1, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }, 
         {
             price: BigInt(19 * 10 ** 18), 
             owner: owner.address, 
             deleted: 1, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }, 
         ]);
         await batchAddBlessingTx.wait();
@@ -168,7 +168,7 @@ describe("CryptoBlessing", function () {
                 price: BigInt(1 * 10 ** 18), 
                 owner: owner.address, 
                 deleted: 0, 
-                taxRate: 10
+                taxRate: 10, ipfs: "ipfs_test"
             }
             ]);
         } catch(e) {
@@ -183,7 +183,7 @@ describe("CryptoBlessing", function () {
                 price: BigInt(0.9 * 10 ** 18), 
                 owner: owner.address, 
                 deleted: 1, 
-                taxRate: 10
+                taxRate: 10, ipfs: "ipfs_test"
             }
             ]);
         } catch(e) {
@@ -217,7 +217,7 @@ describe("CryptoBlessing", function () {
             price: blessingPrice,
             owner: blessingOwner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx.wait();
@@ -300,7 +300,7 @@ describe("CryptoBlessing", function () {
             price: blessingPrice, 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx.wait();
@@ -402,7 +402,7 @@ describe("CryptoBlessing", function () {
             price: blessingPrice, 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx.wait();
@@ -489,7 +489,7 @@ describe("CryptoBlessing", function () {
             price: blessingPrice, 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx.wait();
@@ -571,7 +571,7 @@ describe("CryptoBlessing", function () {
             price: blessingPrice, 
             owner: owner.address, 
             deleted: 0, 
-            taxRate: 10
+            taxRate: 10, ipfs: "ipfs_test"
         }
         ]);
         await addBlessingTx.wait();
