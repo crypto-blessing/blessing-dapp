@@ -57,6 +57,7 @@ const AppBarContent = props => {
 
   const { active, account, library, connector, activate, deactivate, chainId } = useWeb3React()
 
+  const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState('')
   const [alertMessage, setAlertMessage] = useState('')
 
@@ -116,23 +117,38 @@ const AppBarContent = props => {
   }
 
   useEffect(() => {
-    switch (chainId) {
-      case 56:
-        setAlertTitle('System maintenance in progress')
-        setAlertMessage('CryptoBlessing is being upgraded and maintained, please be patient for a more secure contract and a better experience.')
-        break;
-      case 97:
-        setAlertTitle('BSC Testnet')
-        setAlertMessage('You are now on BSC Testnet.')
-        break;
-      case 1337:
-        setAlertTitle('Localnet')
-        setAlertMessage('You are now on Localnet.')
-        break;
-      default:
-        setAlertTitle('Don\'t support this network')
-        setAlertMessage('Please switch your network to BSC Mainnet(chainID: 56).')
+    const loadBeforeOp = async () => {
+
+      const blockResp = await fetch(`/api/security/block`)
+      if (blockResp.block) {
+        setAlertTitle("Block Detected")
+        setAlertMessage("Service is not available in your area, please leave.💗💗💗")
+        setAlertOpen(true)
+      } else {
+        switch (chainId) {
+          case 56:
+            setAlertTitle('System maintenance in progress')
+            setAlertMessage('CryptoBlessing is being upgraded and maintained, please be patient for a more secure contract and a better experience.')
+            break;
+          case 97:
+            setAlertTitle('BSC Testnet')
+            setAlertMessage('You are now on BSC Testnet.')
+            break;
+          case 1337:
+            setAlertTitle('Localnet')
+            setAlertMessage('You are now on Localnet.')
+            break;
+          default:
+            setAlertTitle('Don\'t support this network')
+            setAlertMessage('Please switch your network to BSC Mainnet(chainID: 56).')
+        }
+        if (chainId != 56 && // ** BSC Mainnet maintenance
+          chainId != 97 && chainId != 1337 && chainId != undefined) {
+            setAlertOpen(true)
+        }
+      }
     }
+    loadBeforeOp()
   }, [chainId])
 
   return (
@@ -216,9 +232,7 @@ const AppBarContent = props => {
       {/** System maintenance in progress */}
 
       <Dialog
-        open={
-          chainId != 56 && // ** BSC Mainnet maintenance
-          chainId != 97 && chainId != 1337 && chainId != undefined}
+        open={alertOpen}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
