@@ -55,6 +55,11 @@ const AppBarContent = props => {
     window.open("https://near.cryptoblessing.app/","_blank");
   }
 
+  const handleSolanaClose = () => {
+    setAnchorEl(null);
+    window.open("https://solana.cryptoblessing.app/","_blank");
+  }
+
   const { active, account, library, connector, activate, deactivate, chainId } = useWeb3React()
 
   const [alertOpen, setAlertOpen] = useState(false);
@@ -202,6 +207,7 @@ const AppBarContent = props => {
             }}
           >
             <MenuItem onClick={handleNEARClose}>NEAR Chain</MenuItem>
+            <MenuItem onClick={handleSolanaClose}>Solana Chain</MenuItem>
           </Menu2>
         </div>
       </Box>
