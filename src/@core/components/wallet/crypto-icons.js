@@ -25,6 +25,30 @@ export const BUSD_ICON = () => {
     );
 }
 
+export const MATIC_ICON = () => {
+    const classes = useStyles();
+    
+    return (
+
+        <Icon classes={{root: classes.iconRoot}}>
+            <img className={classes.imageIcon} src="/images/cryptos/polygon-matic-logo.svg" alt='BUSD'/>
+        </Icon>
+
+    );
+}
+
+export const DAI_ICON = () => {
+    const classes = useStyles();
+    
+    return (
+
+        <Icon classes={{root: classes.iconRoot}}>
+            <img className={classes.imageIcon} src="/images/cryptos/multi-collateral-dai-dai-logo.svg" alt='BUSD'/>
+        </Icon>
+
+    );
+}
+
 export const CBT_ICON = () => {
     const classes = useStyles();
     

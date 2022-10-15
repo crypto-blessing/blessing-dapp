@@ -147,7 +147,8 @@ const AppBarContent = props => {
           setAlertMessage('Please switch your network to BSC Mainnet(chainID: 56).')
       }
       if (chainId != 56 && // ** BSC Mainnet maintenance
-        chainId != 97 && chainId != 1337 && chainId != undefined) {
+        chainId != 97 && chainId != 1337 && chainId != undefined
+        && chainId != 137 && chainId != 80001) {
           setAlertOpen(true)
       }
       fetch('/api/security/block')
@@ -241,7 +242,7 @@ const AppBarContent = props => {
         onClose={handleClose}
         autoHideDuration={4000}>
         <Alert onClose={handleClose} severity="error" sx={{ width: '100%', bgcolor: 'white' }}>
-          Only support BSC network!
+          Only support BSC or Polygon network!
         </Alert>
       </Snackbar>
 

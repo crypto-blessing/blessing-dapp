@@ -2,7 +2,7 @@ import { InjectedConnector } from "@web3-react/injected-connector";
 
 
 export const injected = new InjectedConnector({
-  supportedChainIds: [56, 97, 1337],
+  supportedChainIds: [56, 97, 1337, 80001, 137],
 });
 
 // export const getWeb3 = (chainId) => {

@@ -18,7 +18,7 @@ import ImageListItem from '@mui/material/ImageListItem';
 import Chip from '@mui/material/Chip';
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box'
-import {BUSD_ICON, CBT_ICON} from 'src/@core/components/wallet/crypto-icons'
+import {BUSD_ICON, CBT_ICON, MATIC_ICON, DAI_ICON} from 'src/@core/components/wallet/crypto-icons'
 
 import {amountShow} from 'src/@core/utils/amount'
 
@@ -30,7 +30,7 @@ import { useWeb3React } from "@web3-react/core"
 import BUSDContract from 'src/artifacts/contracts/TestBUSD.sol/BUSD.json'
 import CBTContract from 'src/artifacts/contracts/CryptoBlessingToken.sol/CryptoBlessingToken.json'
 import CBNFTContract from 'src/artifacts/contracts/CryptoBlessingNFT.sol/CryptoBlessingNFT.json'
-import {BUSDContractAddress, CBTContractAddress, CBNFTContractAddress} from 'src/@core/components/wallet/address'
+import {BUSDContractAddress, CBTContractAddress, CBNFTContractAddress, DAIContractAddress} from 'src/@core/components/wallet/address'
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -60,6 +60,7 @@ const Wallet = () => {
 
     const [BNBAmount, setBNBAmount] = useState(0)
     const [BUSDAmount, setBUSDAmount] = useState(0)
+    const [DAIAmount, setDAIAmount] = useState(0)
     const [CBTAmount, setCBTAmount] = useState(0)
     const [CBNFTItems, setCBNFTItems] = useState([])
 
@@ -67,12 +68,18 @@ const Wallet = () => {
         if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
             const provider = new ethers.providers.Web3Provider(window.ethereum)
             const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+            const daiContract = new ethers.Contract(DAIContractAddress(chainId), BUSDContract.abi, provider.getSigner())
             const cbtContract = new ethers.Contract(CBTContractAddress(chainId), CBTContract.abi, provider.getSigner())
             const cbNFTContract = new ethers.Contract(CBNFTContractAddress(chainId), CBNFTContract.abi, provider.getSigner())
             provider.getSigner().getAddress().then(async (address) => {
                 try {
                     setBNBAmount(amountShow(await provider.getBalance(address)))
-                    setBUSDAmount(amountShow(await busdContract.balanceOf(address)))
+                    if (chainId == 56 || chainId == 97) {
+                        setBUSDAmount(amountShow(await busdContract.balanceOf(address)))
+                    }
+                    if (chainId == 137 || chainId == 80001) {
+                        setDAIAmount(amountShow(await daiContract.balanceOf(address)))
+                    }
                     setCBTAmount(amountShow(await cbtContract.balanceOf(address)))
                     setCBNFTItems(await cbNFTContract.getMyBlessingsURI())
                 } catch (err) {
@@ -104,6 +111,8 @@ const Wallet = () => {
                                     <StyledTableCell align='right'>Balance</StyledTableCell>
                                 </TableRow>
                             </TableHead>
+
+                            { chainId == 56 || chainId == 97 ?
                             <TableBody>
                                 <StyledTableRow key='BNB'>
                                     <StyledTableCell component='th' scope='row'>
@@ -117,6 +126,7 @@ const Wallet = () => {
                                     </StyledTableCell>
                                     <StyledTableCell align='right'>{BUSDAmount}</StyledTableCell>
                                 </StyledTableRow>
+                                
                                 <StyledTableRow key='CBT'>
                                     <StyledTableCell component='th' scope='row'>
                                         <Chip variant="outlined" icon={<CBT_ICON />} label="CBT" />
@@ -124,15 +134,55 @@ const Wallet = () => {
                                     <StyledTableCell align='right'>{CBTAmount}</StyledTableCell>
                                 </StyledTableRow>
                             </TableBody>
+                            : ""}
+
+                            { chainId == 80001 || chainId == 137 ?
+
+                            <TableBody>
+                                <StyledTableRow key='MATIC'>
+                                    <StyledTableCell component='th' scope='row'>
+                                        <Chip variant="outlined" icon={<MATIC_ICON />} label="MATIC" />
+                                    </StyledTableCell>
+                                    <StyledTableCell align='right'>{BNBAmount}</StyledTableCell>
+                                </StyledTableRow>
+                                <StyledTableRow key='DAI'>
+                                    <StyledTableCell component='th' scope='row'>
+                                        <Chip variant="outlined" icon={<DAI_ICON />} label="DAI" />
+                                    </StyledTableCell>
+                                    <StyledTableCell align='right'>{DAIAmount}</StyledTableCell>
+                                </StyledTableRow>
+                                
+                                <StyledTableRow key='CBT'>
+                                    <StyledTableCell component='th' scope='row'>
+                                        <Chip variant="outlined" icon={<CBT_ICON />} label="CBT" />
+                                    </StyledTableCell>
+                                    <StyledTableCell align='right'>{CBTAmount}</StyledTableCell>
+                                </StyledTableRow>
+                            </TableBody>
+                            : ""}
+
                         </Table>
                     </TableContainer>
                 </Card>
+
+                { chainId == 56 || chainId == 97 ?
                 <Card>
                     <CardContent>
                         <Typography variant='caption'>You can buy BNB on <Link target='_blank' href='https://www.binance.com/en/buy-BNB'>Binance</Link></Typography>
                         <Typography variant='caption'>, or exchange BUSD on <Link target='_blank' href='https://pancakeswap.finance/swap?outputCurrency=0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'>PancakeSwap</Link></Typography>
                     </CardContent>
                 </Card>
+                : ""}
+
+                { chainId == 80001 || chainId == 137 ?
+                <Card>
+                    <CardContent>
+                        <Typography variant='caption'>You can buy MATIC on <Link target='_blank' href='https://www.binance.com/en/how-to-buy/polygon'>Binance</Link></Typography>
+                        <Typography variant='caption'>, or exchange DAI on <Link target='_blank' href='https://quickswap.exchange/#/swap'>QuickSwap</Link></Typography>
+                    </CardContent>
+                </Card>
+                : ""}
+                
                 
             </Grid>
             <Grid item xs={12} sm={6}>

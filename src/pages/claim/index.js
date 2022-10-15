@@ -16,7 +16,7 @@ import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
-import {BUSD_ICON, CBT_ICON} from 'src/@core/components/wallet/crypto-icons'
+import {BUSD_ICON, CBT_ICON, DAI_ICON} from 'src/@core/components/wallet/crypto-icons'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack';
@@ -150,6 +150,8 @@ const ClaimPage = () => {
 
   const [alreadyClaimed, setAlreadyClaimed] = useState(false)
 
+  const [sendTokenName, setSendTokenName] = useState('TOKEN')
+
   const handleClaimSuccessClose = () => {
     setClaimSuccessOpen(false)
   }
@@ -276,6 +278,12 @@ const ClaimPage = () => {
 
   useEffect(() => {
     if (chainId) {
+      if (chainId == 56 || chainId == 97) {
+        setSendTokenName('BUSD')
+      }
+      if (chainId == 137 || chainId == 80001) {
+        setSendTokenName('DAI')
+      }
 
       const provider = new ethers.providers.JsonRpcProvider(getProviderUrl(chainId))
       const cbContract = new ethers.Contract(cryptoBlessingAdreess(chainId), CryptoBlessing.abi, provider)
@@ -329,7 +337,14 @@ const ClaimPage = () => {
             {blessingInDB.description}
             </Typography>
             <Stack direction="row" spacing={1}>
+              {chainId == 56 || chainId == 97 ? 
               <Chip variant="outlined" color="warning" label={claimedAmount + '/' + (blessingSended && blessingSended.tokenAmount ? ethers.utils.formatEther(blessingSended.tokenAmount) : 0) + ' BUSD'} icon={<BUSD_ICON />} />
+              : ''}
+
+              {chainId == 137 || chainId == 80001 ? 
+              <Chip variant="outlined" color="warning" label={claimedAmount + '/' + (blessingSended && blessingSended.tokenAmount ? ethers.utils.formatEther(blessingSended.tokenAmount) : 0) + ' DAI'} icon={<DAI_ICON />} />
+              : ''}
+              
               <Chip variant="outlined" color="primary" label={claimList.length + '/' + (blessingSended && blessingSended.claimQuantity ? blessingSended?.claimQuantity?.toString() : 0) + ' Blessings'} icon={<AccountCircleIcon />} />
             </Stack>
           </CardContent>
@@ -370,7 +385,12 @@ const ClaimPage = () => {
                       <StyledTableCell>{row.time}</StyledTableCell>
                       <StyledTableCell align='right'>
                         <Stack direction="row" spacing={1}>
+                          {chainId == 56 || chainId == 97 ?
                           <Chip variant="outlined" color="warning" label={parseFloat(row.amount).toFixed(2)} icon={<BUSD_ICON />} />
+                          : ''}
+                          {chainId == 137 || chainId == 80001 ?
+                          <Chip variant="outlined" color="warning" label={parseFloat(row.amount).toFixed(2)} icon={<DAI_ICON />} />
+                          : ''}
                           <Chip
                             avatar={<Avatar alt="CryptoBlessing" src={blessingInDB.cdn_path + blessingInDB.image} />}
                             label="1"

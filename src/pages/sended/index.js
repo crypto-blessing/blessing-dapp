@@ -12,7 +12,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import Box from '@mui/material/Box'
-import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
+import {BUSD_ICON, DAI_ICON} from 'src/@core/components/wallet/crypto-icons'
 import Chip from '@mui/material/Chip'
 import Badge from '@mui/material/Badge';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -127,8 +127,12 @@ const BlessingSended = () => {
 
                                         {column.type === undefined ? value : ''}
 
-                                        {column.type === 'amount' ?
+                                        {(chainId == 56 || chainId == 97) && column.type === 'amount' ?
                                         <Chip variant="outlined" color="warning" label={value} icon={<BUSD_ICON />} />
+                                        : ''}
+
+                                        {(chainId == 137 || chainId == 80001) && column.type === 'amount' ?
+                                        <Chip variant="outlined" color="warning" label={value} icon={<DAI_ICON />} />
                                         : ''}
 
                                         {column.type == 'quantity' ?

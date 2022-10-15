@@ -12,7 +12,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TablePagination from '@mui/material/TablePagination'
 import Box from '@mui/material/Box'
-import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
+import {BUSD_ICON, DAI_ICON} from 'src/@core/components/wallet/crypto-icons'
 import Chip from '@mui/material/Chip'
 import { ethers } from 'ethers'
 import { useWeb3React } from "@web3-react/core"
@@ -114,8 +114,12 @@ const BlessingClaimed = () => {
                                         <img width={80} alt='CryptoBlessing' src={process.env.vultr_cdn_path + value} />
                                         : ''}
 
-                                        {column.type === 'amount' ?
+                                        {(chainId == 56 || chainId == 97) && column.type === 'amount' ?
                                         <Chip variant="outlined" color="warning" label={value} icon={<BUSD_ICON />} />
+                                        : ''}
+
+                                        {(chainId == 137 || chainId == 80001) && column.type === 'amount' ?
+                                        <Chip variant="outlined" color="warning" label={value} icon={<DAI_ICON />} />
                                         : ''}
 
                                         {column.type === 'progress' ?

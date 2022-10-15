@@ -33,10 +33,10 @@ import IosShareIcon from '@mui/icons-material/IosShare';
 import { green } from '@mui/material/colors';
 
 // ** Icons Imports
-import {BUSD_ICON} from 'src/@core/components/wallet/crypto-icons'
+import {BUSD_ICON, DAI_ICON} from 'src/@core/components/wallet/crypto-icons'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-import {getProviderUrl, simpleShow, cryptoBlessingAdreess, BUSDContractAddress} from 'src/@core/components/wallet/address'
+import {getProviderUrl, simpleShow, cryptoBlessingAdreess, BUSDContractAddress, DAIContractAddress} from 'src/@core/components/wallet/address'
 import {encode} from 'src/@core/utils/cypher'
 
 
@@ -93,6 +93,8 @@ const BlessingCard2 = (props) => {
 
   const [loading, setLoading] = useState(false);
 
+  const [sendTokenName, setSendTokenName] = useState('TOKEN');
+
   const handleClose = () => {
     setOpen(false)
     setBlessingCaption('')
@@ -132,14 +134,14 @@ const BlessingCard2 = (props) => {
     if (tokenAmount > 0 && claimQuantity > 0) {
       let totalPay = (claimQuantity * props.blessing.price) + parseFloat(tokenAmount)
       refreshBUSDApprove(totalPay)
-      payCaption = `You will pay ${totalPay.toFixed(2)} BUSD. `
+      payCaption = `You will pay ${totalPay.toFixed(2)} ${sendTokenName}. `
     } else {
       payCaption = ''
     }
     if (payCaption !== '') {
       if (claimType > -1) {
         if (claimType === 0) {
-          claimCaption = `Your friends will claim ${(tokenAmount / claimQuantity).toFixed(2)}(tax in) BUSD and one more NFT. `
+          claimCaption = `Your friends will claim ${(tokenAmount / claimQuantity).toFixed(2)}(tax in) ${sendTokenName} and one more NFT. `
         } else if (claimType === 1) {
           claimCaption = `Your friends will claim a random amount and one more NFT.`
         }
@@ -153,13 +155,23 @@ const BlessingCard2 = (props) => {
   const refreshBUSDApprove = (totalPay) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+    const daiContract = new ethers.Contract(DAIContractAddress(chainId), BUSDContract.abi, provider.getSigner())
     provider.getSigner().getAddress().then(async (address) => {
       try {
-        const allowance = await busdContract.allowance(address, cryptoBlessingAdreess(chainId))
-        const busdAllownce = ethers.utils.formatEther(allowance)
-        console.log('totalBUSDArppoveAmount', totalPay)
-        console.log('busdAllownce', busdAllownce)
-        setNeedApproveBUSDAmount(BigInt((totalPay - busdAllownce) * 10 ** 18))
+        if (chainId === 56 || chainId === 97) {
+          const allowance = await busdContract.allowance(address, cryptoBlessingAdreess(chainId))
+          const busdAllownce = ethers.utils.formatEther(allowance)
+          console.log('totalBUSDArppoveAmount', totalPay)
+          console.log('busdAllownce', busdAllownce)
+          setNeedApproveBUSDAmount(BigInt((totalPay - busdAllownce) * 10 ** 18))
+        }
+        if (chainId === 137 || chainId === 80001) {
+          const allowance = await daiContract.allowance(address, cryptoBlessingAdreess(chainId))
+          const daiAllownce = ethers.utils.formatEther(allowance)
+          console.log('totalDAIArppoveAmount', totalPay)
+          console.log('daiAllownce', daiAllownce)
+          setNeedApproveBUSDAmount(BigInt((totalPay - daiAllownce) * 10 ** 18))
+        }
       } catch (err) {
           console.log("Error: ", err)
       }
@@ -167,20 +179,31 @@ const BlessingCard2 = (props) => {
   }
 
   const checkFormValidate = () => {
-    if (tokenAmount <= 0 || BigInt((claimQuantity * props.blessing.price + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
-      setAlertMsg('You have insufficient BUSD balance.')
-      setAlertOpen(true);
-
-      return false
+    if (chainId === 56 || chainId === 97) {
+      if (tokenAmount <= 0 || BigInt((claimQuantity * props.blessing.price + parseFloat(tokenAmount)) * 10 ** 18) > busdAmount) {
+        setAlertMsg('You have insufficient ' + sendTokenName + ' balance.')
+        setAlertOpen(true);
+  
+        return false
+      }
     }
+    if (chainId === 137 || chainId === 80001) {
+      if (tokenAmount <= 0 || BigInt((claimQuantity * props.blessing.price + parseFloat(tokenAmount)) * 10 ** 18) > daiAmount) {
+        setAlertMsg('You have insufficient ' + sendTokenName + ' balance.')
+        setAlertOpen(true);
+  
+        return false
+      }
+    }
+    
     if (claimQuantity <= 0 || claimQuantity > 13) {
-      setAlertMsg('You only have up to 13 friends to collect your BUSD')
+      setAlertMsg('You only have up to 13 friends to collect your ' + sendTokenName)
       setAlertOpen(true);
 
       return false
     }
     if (claimType === -1) {
-      setAlertMsg('Pls choose the way your friend will claim your BUSD')
+      setAlertMsg('Pls choose the way your friend will claim your ' + sendTokenName)
       setAlertOpen(true);
 
       return false
@@ -196,9 +219,16 @@ const BlessingCard2 = (props) => {
     setApproving(true)
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+    const daiContract = new ethers.Contract(DAIContractAddress(chainId), BUSDContract.abi, provider.getSigner())
     try {
-      const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
-      await tx.wait()
+      if (chainId === 56 || chainId === 97) {
+        const tx = await busdContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
+        await tx.wait()
+      }
+      if (chainId === 137 || chainId === 80001) {
+        const tx = await daiContract.approve(cryptoBlessingAdreess(chainId), needApproveBUSDAmount)
+        await tx.wait()
+      }
       refreshBUSDApprove((claimQuantity * props.blessing.price) + parseFloat(tokenAmount))
       setApproving(false)
       setLoading(true)
@@ -285,7 +315,7 @@ const BlessingCard2 = (props) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     provider.getSigner().getAddress().then(async (address) => {
       const privateKey = localStorage.getItem('my_blessing_claim_key_' + blessingKeypairAddress)
-      navigator.clipboard.writeText(`[CryptoBlessing] ${props.blessing.title} | ${props.blessing.description}. Claim your BUSD & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(address)}&blessing=${encode(blessingKeypairAddress)}&key=${encode(privateKey)}`)
+      navigator.clipboard.writeText(`[CryptoBlessing] ${props.blessing.title} | ${props.blessing.description}. Claim your ${sendTokenName} & blessing NFT here: https://cryptoblessing.app/claim?sender=${encode(address)}&blessing=${encode(blessingKeypairAddress)}&key=${encode(privateKey)}`)
     })
   }
 
@@ -301,14 +331,23 @@ const BlessingCard2 = (props) => {
   }
 
   const [busdAmount, setBusdAmount] = useState(0)
+  const [daiAmount, setDAIAmount] = useState(0)
 
   async function fetchBUSDAmount() {
     if (active && chainId != 'undefined' && typeof window.ethereum !== 'undefined') {
         const provider = new ethers.providers.Web3Provider(window.ethereum)
         const busdContract = new ethers.Contract(BUSDContractAddress(chainId), BUSDContract.abi, provider.getSigner())
+        const daiContract = new ethers.Contract(DAIContractAddress(chainId), BUSDContract.abi, provider.getSigner())
         provider.getSigner().getAddress().then(async (address) => {
             try {
+              if (chainId == 56 || chainId == 97) {
+                setSendTokenName('BUSD')
                 setBusdAmount(await busdContract.balanceOf(address))
+              }
+              if (chainId == 137 || chainId == 80001) {
+                setSendTokenName('DAI')
+                setDAIAmount(await daiContract.balanceOf(address))
+              }
             } catch (err) {
                 console.log("Error: ", err)
             }
@@ -424,7 +463,7 @@ const BlessingCard2 = (props) => {
                 </CardContent>
                 <CardActions className='card-action-dense'>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                  <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='warning'>{props.blessing.price} BUSD</Button>
+                  <Button startIcon={<AttachMoneyIcon />} variant='outlined' color='warning'>{props.blessing.price} {sendTokenName}</Button>
                   </Box>
                 </CardActions>
               </Grid>
@@ -434,6 +473,7 @@ const BlessingCard2 = (props) => {
             <CardContent>
               <form onSubmit={e => e.preventDefault()}>
                 <Grid container spacing={5}>
+                  {chainId == 56 || chainId == 97 ?
                   <Grid item xs={12}>
                     <TextField
                       onChange={handleTokenAmountChange}
@@ -451,6 +491,28 @@ const BlessingCard2 = (props) => {
                     />
                     <Typography variant='caption'>help? <Link target='_blank' href='https://pancakeswap.finance/swap?outputCurrency=0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56'>PancakeSwap</Link> for BUSD</Typography>
                   </Grid>
+                  : ''}
+
+                  {chainId == 137 || chainId == 80001 ?
+                  <Grid item xs={12}>
+                    <TextField
+                      onChange={handleTokenAmountChange}
+                      fullWidth
+                      label={'How much DAI do you want to send?(wallet: ' + parseFloat(ethers.utils.formatEther(daiAmount)).toFixed(2) + ' DAI)'}
+                      placeholder='10'
+                      type='number'
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position='start'>
+                            <DAI_ICON />
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                    <Typography variant='caption'>help? <Link target='_blank' href='https://quickswap.exchange/#/swap'>QuickSwap</Link> for DAI</Typography>
+                  </Grid>
+                  : ''} 
+                  
                   
                   <Grid item xs={12}>
                     <TextField
@@ -470,7 +532,7 @@ const BlessingCard2 = (props) => {
                   </Grid>
                   <Grid item xs={12}>
                     <FormControl>
-                      <FormLabel id="demo-row-radio-buttons-group-label">The way they claim your BUSD?</FormLabel>
+                      <FormLabel id="demo-row-radio-buttons-group-label">The way they claim your {sendTokenName}?</FormLabel>
                       <RadioGroup
                         onChange={handleClaimTypeChange}
                         row
@@ -506,7 +568,7 @@ const BlessingCard2 = (props) => {
               ?
               <Box sx={{ m: 1, position: 'relative' }}>
                 <Button onClick={approveBUSD} disabled={approving} color='info' size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
-                  {approving ? 'Waiting for approve transaction...' : 'Approve BUSD'}
+                  {approving ? 'Waiting for approve transaction...' : 'Approve ' + sendTokenName}
                 </Button>
                 {approving && (
                   <CircularProgress
